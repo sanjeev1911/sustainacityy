@@ -6,6 +6,25 @@ import { VehicleGraph } from './vehicles/vehicleGraph.js';
 import { PowerService } from './services/power.js';
 import { SimService } from './services/simService.js';
 
+class Residents {
+  constructor(maxCapacity) {
+    this.maxCapacity = maxCapacity; // Max residents (e.g., 200)
+    this.count = 20; // Start low, not 100
+  }
+
+  simulate(happiness, pollution) {
+    // Growth rate: +5% if happiness > 60, -5% if pollution > 100, capped at maxCapacity
+    const growthFactor = (happiness > 60 ? 0.05 : 0) - (pollution > 100 ? 0.05 : 0);
+    this.count += this.count * growthFactor;
+    this.count = Math.max(0, Math.min(this.maxCapacity, Math.floor(this.count)));
+    console.log(`Residents simulated: ${this.count}/${this.maxCapacity}, Happiness: ${happiness}, Pollution: ${pollution}`);
+  }
+
+  dispose() {
+    console.log(`Disposing ${this.count} residents`);
+  }
+}
+
 export class City extends THREE.Group {
   debugMeshes = new THREE.Group();
   root = new THREE.Group();
@@ -23,7 +42,6 @@ export class City extends THREE.Group {
     this.add(this.debugMeshes);
     this.add(this.root);
 
-    // Initialize tile grid
     this.tiles = [];
     for (let x = 0; x < this.size; x++) {
       const column = [];
@@ -36,7 +54,6 @@ export class City extends THREE.Group {
       this.tiles.push(column);
     }
 
-    // Initialize services and vehicle graph
     this.services = [new PowerService()];
     this.vehicleGraph = new VehicleGraph(this.size);
     this.debugMeshes.add(this.vehicleGraph);
@@ -50,7 +67,7 @@ export class City extends THREE.Group {
         population += tile.building?.residents?.count || 0;
       }
     }
-    console.log('City.population:', population); // Debug population
+    console.log('City.population:', population);
     return population;
   }
 
@@ -67,7 +84,11 @@ export class City extends THREE.Group {
       this.services.forEach(service => service.simulate(this));
       for (let x = 0; x < this.size; x++) {
         for (let y = 0; y < this.size; y++) {
-          this.getTile(x, y).simulate(this);
+          const tile = this.getTile(x, y);
+          if (tile.building?.residents) {
+            tile.building.residents.simulate(window.game.happiness, window.game.pollution);
+          }
+          tile.simulate(this);
         }
       }
     }
@@ -85,13 +106,11 @@ export class City extends THREE.Group {
         tile.setBuilding(building);
         tile.refreshView(this);
 
-        // Assign residents for residential buildings
         if (building.type === BuildingType.residential) {
-          building.residents = { count: 100 }; // 100 residents per residential building
+          building.residents = new Residents(200); // Max 200, starts at 20
           console.log('Assigned residents:', building.residents);
         }
 
-        // Refresh neighboring tiles
         this.getTile(x - 1, y)?.refreshView(this);
         this.getTile(x + 1, y)?.refreshView(this);
         this.getTile(x, y - 1)?.refreshView(this);
@@ -122,7 +141,6 @@ export class City extends THREE.Group {
       tile.setBuilding(null);
       tile.refreshView(this);
 
-      // Refresh neighboring tiles
       this.getTile(x - 1, y)?.refreshView(this);
       this.getTile(x + 1, y)?.refreshView(this);
       this.getTile(x, y - 1)?.refreshView(this);

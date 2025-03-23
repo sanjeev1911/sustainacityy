@@ -12,11 +12,11 @@ export class Game {
   selectedObject = null;
   buildingCounts = { road: 0, residential: 0 };
   buildings = [];
-  revenue = 100000;
+  revenue = 1000000; // Inflated starting cash
   maintenanceCost = 0;
   pollution = 0;
   happiness = 50;
-  lifespan = 80;
+  lifespan = 100;
 
   constructor(city) {
     this.city = city;
@@ -38,7 +38,7 @@ export class Game {
       this.city = new City(16);
       this.initialize(this.city);
       this.start();
-      setInterval(this.simulate.bind(this), 1000);
+      setInterval(this.simulate.bind(this), 1000); // Runs every second
     });
 
     window.addEventListener('resize', this.onResize.bind(this), false);
@@ -95,27 +95,23 @@ export class Game {
     this.renderer.setAnimationLoop(null);
   }
 
-  draw() {
-    this.city.draw();
-    this.updateFocusedObject();
-    if (this.inputManager.isLeftMouseDown) {
-      this.useTool();
-    }
-    this.renderer.render(this.scene, this.cameraManager.camera);
-    window.updateMetrics(); // Call every frame
-  }
-
   simulate() {
     if (window.ui.isPaused) return;
 
-    const taxRevenue = this.city.population * 0.5;
-    this.maintenanceCost = this.buildingCounts.road * 10 + this.buildingCounts.residential * 20;
+    const taxRevenue = this.city.population * 10; // $10 per resident
+    this.maintenanceCost = (this.buildingCounts.road * 50) + (this.buildingCounts.residential * 100);
     this.revenue += taxRevenue - this.maintenanceCost;
-    this.pollution = Math.max(0, this.buildingCounts.road * 1 + this.buildingCounts.residential * 0.5);
-    this.happiness = Math.max(0, Math.min(100, 50 + (this.city.population / 100) - this.pollution / 2));
-    this.lifespan = Math.max(50, Math.min(100, 80 - this.pollution / 5));
+    this.pollution = Math.min(1000, (this.buildingCounts.road * 10) + (this.buildingCounts.residential * 5));
+    this.happiness = Math.max(0, Math.min(100, 50 + (this.city.population / 50) - (this.pollution / 20)));
+    this.lifespan = Math.max(50, Math.min(100, 100 - (this.pollution / 10)));
 
-    console.log('Simulate:', { revenue: this.revenue, population: this.city.population, pollution: this.pollution });
+    console.log('Simulate:', { 
+      revenue: this.revenue, 
+      population: this.city.population, 
+      pollution: this.pollution, 
+      happiness: this.happiness, 
+      lifespan: this.lifespan 
+    });
 
     if (this.revenue < 0) {
       console.log('Game Over: Revenue dropped below 0');
@@ -124,7 +120,21 @@ export class Game {
       return;
     }
 
-    this.city.simulate(1);
+    this.city.simulate(1); // Updates population dynamically via Residents class
+  }
+
+  draw() {
+    this.city.draw();
+    this.updateFocusedObject();
+    if (this.inputManager.isLeftMouseDown) {
+      this.useTool();
+    }
+    this.renderer.render(this.scene, this.cameraManager.camera);
+    if (window.updateMetrics) {
+      window.updateMetrics(); // Syncs UI with latest population
+    } else {
+      console.log('updateMetrics not found');
+    }
   }
 
   useTool() {
@@ -154,7 +164,7 @@ export class Game {
             building.type = type;
             if (type === 'road') this.buildingCounts.road++;
             if (type === 'residential') this.buildingCounts.residential++;
-            const costs = { road: 50, residential: 150 };
+            const costs = { road: 500, residential: 1500 }; // Inflated costs
             this.revenue -= costs[type] || 0;
           }
         }
