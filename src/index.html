@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Future City</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+    }
+    .split-bg {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100vh;
+      transition: all 0.5s ease;
+    }
+    .utopia {
+      left: 0;
+      background: url('https://i.pinimg.com/736x/17/f2/49/17f249b99582b9a8bc4b4e3512f5653e.jpg') no-repeat center/cover;
+      filter: brightness(1.1);
+    }
+    .dystopia {
+      right: 0;
+      background: url('https://markmanson.net/wp-content/uploads/2018/12/5-books-explaining-why-everything-is-fucked.jpg') no-repeat center/cover;
+      filter: grayscale(0.8) brightness(0.7);
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    }
+    .clock {
+      font-size: 4rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+    .btn-glow {
+      background: linear-gradient(90deg, #00ffcc, #00ccff);
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+      transition: all 0.3s ease;
+      opacity: 1; /* Ensure visibility */
+      display: inline-block;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="text-white">
+  <!-- Split Background -->
+  <div class="split-bg utopia"></div>
+  <div class="split-bg dystopia"></div>
+  <div class="overlay"></div>
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-20 flex justify-between items-center px-8 py-4">
+    <div class="text-2xl font-bold tracking-wide">Future City</div>
+    <div class="space-x-6">
+      <a href="#" class="hover:text-cyan-300 transition">Play</a>
+      <a href="#" class="hover:text-cyan-300 transition">Data</a>
+      <a href="#" class="hover:text-cyan-300 transition">Vision</a>
+      <a href="#" class="hover:text-cyan-300 transition">Act</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="relative z-10 flex flex-col items-center justify-center h-screen text-center">
+    <!-- Countdown Clock -->
+    <div id="clock" class="clock text-cyan-300 font-mono mb-8">10:00</div>
+
+    <!-- Headline -->
+    <h1 class="text-5xl md:text-7xl font-extrabold mb-4 leading-tight">
+      Your Choices Shape Tomorrow
+    </h1>
+
+    <!-- Subtext -->
+    <p class="text-lg md:text-xl max-w-2xl mx-auto mb-8 opacity-80">
+      Build a sustainable city or watch it crumble—every energy decision counts as the clock ticks down.
+    </p>
+
+    <!-- Call to Action (Play the Game button) -->
+    <a href="game.html" class="btn-glow text-lg font-semibold py-3 px-8 rounded-full text-black">
+      Play the Game
+    </a>
+  </div>
+
+  <!-- JavaScript for Countdown and Animations -->
+  <script>
+    // Countdown Timer
+    let timeLeft = 600; // 10 minutes in seconds
+    const clock = document.getElementById('clock');
+
+    function updateClock() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      clock.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`; // Fixed template literal syntax
+      timeLeft--;
+
+      if (timeLeft < 0) {
+        timeLeft = 600; // Reset
+        alert("Time’s up! The future’s yours to rewrite.");
+      }
+    }
+
+    setInterval(updateClock, 1000);
+
+    // GSAP Animations (using reliable 'to' method)
+    gsap.to('.clock', { 
+      opacity: 1, 
+      y: 0, 
+      duration: 1, 
+      delay: 0.5, 
+      ease: 'power2.out' 
+    });
+    gsap.to('h1', { 
+      opacity: 1, 
+      y: 0, 
+      duration: 1, 
+      delay: 1, 
+      ease: 'power2.out' 
+    });
+    gsap.to('p', { 
+      opacity: 0.8, 
+      y: 0, 
+      duration: 1, 
+      delay: 1.5, 
+      ease: 'power2.out' 
+    });
+    gsap.to('.btn-glow', { 
+      opacity: 1, 
+      scale: 1, 
+      duration: 1, 
+      delay: 2, 
+      ease: 'power2.out',
+      onComplete: () => console.log('Button animation completed')
+    });
+
+    // Hover effect on split backgrounds
+    document.querySelector('.utopia').addEventListener('mouseenter', () => {
+      gsap.to('.utopia', { width: '60%', duration: 0.5 });
+      gsap.to('.dystopia', { width: '40%', duration: 0.5 });
+    });
+    document.querySelector('.dystopia').addEventListener('mouseenter', () => {
+      gsap.to('.utopia', { width: '40%', duration: 0.5 });
+      gsap.to('.dystopia', { width: '60%', duration: 0.5 });
+    });
+    document.querySelector('.split-bg').addEventListener('mouseleave', () => {
+      gsap.to('.split-bg', { width: '50%', duration: 0.5 });
+    });
+  </script>
+</body>
+</html>
