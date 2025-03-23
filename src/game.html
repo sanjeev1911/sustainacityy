@@ -26,6 +26,34 @@
     #dashboard-content.show { display: block; }
     #dashboard ul { list-style: none; padding: 0; margin: 0; }
     #dashboard li { margin: 5px 0; }
+    #game-over { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      background: rgba(0, 0, 0, 0.9); 
+      color: #fff; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 2000; 
+      visibility: hidden; 
+    }
+    #game-over h2 { font-size: 3rem; margin: 0; text-shadow: 0 0 10px #ff5555; }
+    #game-over p { font-size: 1.2rem; margin: 10px 0; }
+    #restart-button { 
+      background: #00cc99; 
+      color: #fff; 
+      border: none; 
+      padding: 10px 20px; 
+      font-size: 1.2rem; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      transition: background 0.3s; 
+    }
+    #restart-button:hover { background: #33ffcc; }
   </style>
 </head>
 <body>
@@ -89,7 +117,6 @@
       <div id="instructions">INTERACT - Left Mouse<br>ROTATE - Right Mouse<br>PAN - Ctrl + Right Mouse<br>ZOOM - Scroll</div>
       <div id="version">v0.3.0</div>
     </div>
-    <!-- New Dashboard -->
     <div id="dashboard">
       <h3 onclick="document.getElementById('dashboard-content').classList.toggle('show')">City Dashboard ▼</h3>
       <div id="dashboard-content">
@@ -102,15 +129,21 @@
         </ul>
       </div>
     </div>
+    <div id="game-over">
+      <h2>Game Over</h2>
+      <p>Your city has run out of funds!</p>
+      <button id="restart-button">Restart</button>
+    </div>
   </div>
 
   <script>
-    let lastHappiness = 50; // Track for trend
+    let lastHappiness = 50;
+    let lastRevenue = 100000;
+
     function updateMetrics() {
       const game = window.game;
       if (!game) return;
 
-      // Use game’s precomputed values instead of recalculating
       const revenue = Math.floor(game.revenue || 0);
       const maintenanceCost = Math.floor(game.maintenanceCost || 0);
       const pollution = Math.floor(Math.max(0, Math.min(100, game.pollution || 0)));
@@ -118,9 +151,8 @@
       const lifespan = Math.floor(game.lifespan || 0);
       const population = game.city.population || 0;
       const taxRevenue = population * 0.5;
-      const roadPollution = (game.buildingCounts.road || 0) * 1; // 1 pollution per road from game.js
+      const roadPollution = (game.buildingCounts.road || 0) * 1;
 
-      // Title bar updates
       const revenueCounter = document.getElementById('revenue-counter');
       const maintenanceCostEl = document.getElementById('maintenance-cost');
       const pollutionFill = document.querySelector('.pollution .progress-fill');
@@ -131,7 +163,10 @@
       const lifespanTooltip = document.getElementById('lifespan-tooltip');
       const populationCounter = document.getElementById('population-counter');
 
-      if (revenueCounter) revenueCounter.textContent = `$${revenue}`;
+      if (revenueCounter) {
+        revenueCounter.textContent = `$${revenue}`;
+        revenueCounter.style.color = revenue > lastRevenue ? '#00cc99' : revenue < lastRevenue ? '#ff5555' : '#fff';
+      }
       if (maintenanceCostEl) maintenanceCostEl.textContent = `(-$${maintenanceCost})`;
       if (pollutionFill) pollutionFill.style.width = `${pollution}%`;
       if (happinessFill) happinessFill.style.width = `${happiness}%`;
@@ -141,7 +176,6 @@
       if (lifespanTooltip) lifespanTooltip.textContent = `${lifespan} years`;
       if (populationCounter) populationCounter.textContent = population;
 
-      // Dashboard updates
       const dashRevenue = document.getElementById('dash-revenue');
       const dashTax = document.getElementById('dash-tax');
       const dashPollution = document.getElementById('dash-pollution');
@@ -163,6 +197,7 @@
       if (dashBuildingCount) dashBuildingCount.textContent = game.buildings.length || 0;
 
       lastHappiness = happiness;
+      lastRevenue = revenue;
     }
 
     function showNotification(message) {
@@ -174,11 +209,24 @@
       }
     }
 
+    function showGameOver() {
+      const gameOverScreen = document.getElementById('game-over');
+      if (gameOverScreen) {
+        gameOverScreen.style.visibility = 'visible';
+      }
+      window.ui.isPaused = true;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       updateMetrics();
-      // Ensure UI event handlers use window.ui
       window.showNotification = showNotification;
       window.updateMetrics = updateMetrics;
+      window.showGameOver = showGameOver;
+
+      const restartButton = document.getElementById('restart-button');
+      if (restartButton) {
+        restartButton.addEventListener('click', () => location.reload());
+      }
     });
   </script>
 </body>
