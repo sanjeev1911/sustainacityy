@@ -140,6 +140,19 @@
       display: none;
       margin-bottom: 2rem;
     }
+    /* Game-specific styles from your original game.html */
+    .metric { display: flex; align-items: center; margin: 0 10px; color: #fff; font-size: 1rem; position: relative; }
+    .metric span.emoji { font-size: 1.2rem; margin-right: 5px; }
+    .progress-bar { width: 100px; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-left: 5px; position: relative; }
+    .progress-fill { height: 100%; transition: width 0.5s ease; }
+    .pollution .progress-fill { background: #8b4513; }
+    .happiness .progress-fill { background: #ffd700; }
+    .lifespan .progress-fill { background: #00cc99; }
+    #render-target { width: 100%; height: 80vh; }
+    #ui-toolbar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+    .ui-button { padding: 5px; background: #333; border: none; cursor: pointer; }
+    .ui-button.selected { background: #555; }
+    .toolbar-icon { width: 24px; height: 24px; }
   </style>
 </head>
 <body>
@@ -161,7 +174,7 @@
     <h1 class="hero-title">Shape a Sustainable Future</h1>
     <p class="hero-subtitle max-w-lg">Collect Resources, Control Pollution, and Build a Green City.</p>
     <div id="game-over" class="game-over">You were too late. The world is destroyed.</div>
-    <a href="#" class="minecraft-button mt-6" id="action-button">Start Building</a>
+    <button class="minecraft-button mt-6" id="action-button">Start Building</button>
   </div>
 
   <!-- Game Section -->
@@ -169,6 +182,60 @@
     <div class="container mx-auto text-center blocky-container">
         <h2 class="section-title">The Game</h2>
         <p class="section-subtitle">Craft buildings, use green energy, and balance resources to thrive!</p>
+        <div id="root-window" class="mt-6">
+          <div id="render-target"></div>
+          <div id="loading" class="text-overlay"><div>LOADING...</div></div>
+          <div id="ui">
+            <div id="title-bar" class="flex justify-between p-2 bg-black bg-opacity-50">
+              <div class="title-bar-left-items">
+                <div class="metric">
+                  <span class="emoji">💰</span>
+                  <span id="revenue-counter">$100000</span>
+                  <span id="maintenance-cost" style="margin-left: 5px; color: #ff5555;">(-$0)</span>
+                </div>
+                <div class="metric pollution">
+                  <span class="emoji">☁️</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="title-bar-center-items">
+                <span id="city-name">My City</span><span> - </span><span id="sim-time">1/1/2023</span>
+              </div>
+              <div class="title-bar-right-items">
+                <div class="metric">
+                  <img id="population-icon" src="/icons/person.png">
+                  <span id="population-counter">0</span>
+                </div>
+                <div class="metric happiness">
+                  <span class="emoji">😊</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 50%;"></div>
+                  </div>
+                </div>
+                <div class="metric lifespan">
+                  <span class="emoji">⏳</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 80%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="ui-toolbar" class="container">
+              <button id="button-select" class="ui-button selected" data-type="select"><img class="toolbar-icon" src="/icons/select-color.png"></button>
+              <button id="button-bulldoze" class="ui-button" data-type="bulldoze"><img class="toolbar-icon" src="/icons/bulldozer-color.png"></button>
+              <button id="button-residential" class="ui-button" data-type="residential"><img class="toolbar-icon" src="/icons/house-color.png"></button>
+              <button id="button-commercial" class="ui-button" data-type="commercial"><img class="toolbar-icon" src="/icons/store-color.png"></button>
+              <button id="button-industrial" class="ui-button" data-type="industrial"><img class="toolbar-icon" src="/icons/factory-color.png"></button>
+              <button id="button-road" class="ui-button" data-type="road"><img class="toolbar-icon" src="/icons/road-color.png"></button>
+              <button id="button-power-plant" class="ui-button" data-type="power-plant"><img class="toolbar-icon" src="/icons/power-color.png"></button>
+              <button id="button-power-line" class="ui-button" data-type="power-line"><img class="toolbar-icon" src="/icons/power-line-color.png"></button>
+              <button id="button-tree" class="ui-button" data-type="tree">🌳</button>
+              <button id="button-pause" class="ui-button"><img id="pause-button-icon" class="toolbar-icon" src="/icons/pause-color.png"></button>
+            </div>
+          </div>
+        </div>
     </div>
   </section>
 
@@ -177,25 +244,21 @@
     <div class="container mx-auto text-center">
       <h2 class="section-title mb-10">Our Mission</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
-        <!-- Problem Statement -->
         <div class="mission-card">
           <h3 class="text-2xl font-bold text-white mb-4">The Challenge</h3>
           <p class="text-lg">Futuristic urban planning struggles to balance economic growth, sustainability, and citizen well-being, often resulting in high pollution and low happiness. Existing simulation tools are complex and inaccessible, lacking real-time feedback for users to learn from their decisions.</p>
           <img src="istockphoto-1471868963-612x612-2.jpg" alt="Polluted City" class="mt-4 rounded-lg shadow-lg">
         </div>
-        <!-- Target Audience -->
         <div class="mission-card">
           <h3 class="text-2xl font-bold text-white mb-4">Who We Serve</h3>
           <p class="text-lg">Our solution is youth-centric but designed for everyone—empowering the next generation and beyond to rethink urban living with sustainability at its core.</p>
           <img src="istockphoto-839295596-612x612.jpg" alt="Youth Building" class="mt-4 rounded-lg shadow-lg">
         </div>
-        <!-- Proposed Solution -->
         <div class="mission-card">
           <h3 class="text-2xl font-bold text-white mb-4">Our Vision</h3>
           <p class="text-lg">We’re crafting an interactive, user-friendly platform that educates through a 3D simulation aligned with the UN’s Sustainable Development Goals. Players make real-time energy and infrastructure choices, seeing their direct impact on urban sustainability.</p>
           <img src="The top 10 green cities in the world-1.jpg" alt="Green City" class="mt-4 rounded-lg shadow-lg">
         </div>
-        <!-- Validation -->
         <div class="mission-card">
           <h3 class="text-2xl font-bold text-white mb-4">Proof of Impact</h3>
           <p class="text-lg">The game showcases long-term effects of urban planning—factories spike pollution, parks boost livability. We’ll validate success through user feedback, awareness shifts, and in-game data analysis, ensuring realistic cause-and-effect in city growth.</p>
@@ -241,17 +304,23 @@
     </div>
   </footer>
 
-  <!-- JavaScript for Color Transition and Animations -->
+  <!-- Game Scripts -->
+  <script type="module" src="./scripts/game.js"></script>
+  <script type="module" src="./scripts/ui.js"></script>
+
+  <!-- JavaScript for Color Transition, Animations, and Game Start -->
   <script>
     let timeLeft = 300; // 5 minutes in seconds
     let pollutionLevel = 0;
     const maxTime = 300;
     let timerInterval;
+    let gameStarted = false;
 
     const clock = document.getElementById('clock');
     const actionButton = document.getElementById('action-button');
     const gameOverText = document.getElementById('game-over');
     const heroSection = document.getElementById('hero-section');
+    const gameSection = document.getElementById('game');
 
     function updateBackground() {
       pollutionLevel = 1 - (timeLeft / maxTime);
@@ -294,40 +363,31 @@
       actionButton.textContent = 'Start Building';
       updateBackground();
       startTimer();
+      gameStarted = false;
+      gameSection.style.display = 'none'; // Hide game on reset
+    }
 
-      gsap.to('.clock', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
-      gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 2.5, ease: 'power2.out' });
-      gsap.to('.minecraft-button', { 
-        y: -20, 
-        duration: 2, 
-        repeat: -1, 
-        yoyo: true, 
-        ease: 'sine.inOut',
-        delay: 3
-      });
-
-      const title = heroSection.querySelector('h1');
-      const text = "Shape a Sustainable Future";
-      title.textContent = '';
-      title.style.opacity = 1;
-      let i = 0;
-      function typeWriter() {
-        if (i < text.length) {
-          title.textContent += text.charAt(i);
-          i++;
-          setTimeout(typeWriter, 100);
-        }
+    function startGame() {
+      if (!gameStarted) {
+        gameStarted = true;
+        clearInterval(timerInterval); // Stop the doomsday clock
+        heroSection.style.display = 'none'; // Hide hero section
+        gameSection.style.display = 'block'; // Show game section
+        window.scrollTo({ top: gameSection.offsetTop, behavior: 'smooth' });
+        // Ensure game initializes (handled by game.js)
       }
-      setTimeout(typeWriter, 1000);
     }
 
     actionButton.addEventListener('click', (e) => {
       e.preventDefault();
       if (actionButton.textContent === 'Retry') {
         resetGame();
+      } else {
+        startGame();
       }
     });
 
+    // GSAP Animations
     gsap.to('.clock', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
     gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 2.5, ease: 'power2.out' });
     gsap.to('.minecraft-button', { 
@@ -340,7 +400,7 @@
     });
 
     const title = heroSection.querySelector('h1');
-    const text = title.textContent;
+    const text = "Shape a Sustainable Future";
     title.textContent = '';
     title.style.opacity = 1;
     let i = 0;
@@ -352,6 +412,12 @@
       }
     }
     setTimeout(typeWriter, 1000);
+
+    // Game UI initialization (adapted from your game.html)
+    document.querySelectorAll('.ui-button').forEach(button => {
+      button.addEventListener('click', (event) => window.ui.onToolSelected(event));
+    });
+    document.getElementById('button-pause').addEventListener('click', () => window.ui.togglePause());
   </script>
 </body>
 </html>
