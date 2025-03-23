@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SustainaCity - About Us</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Google Fonts: Comic Neue for a playful, kid-friendly look -->
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #90EE90; /* Light green */
+      font-family: 'Comic Neue', cursive;
+      overflow-x: hidden;
+      color: #333;
+      margin: 0;
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(144, 238, 144, 0.2);
+      z-index: 1;
+    }
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #FFFF99; /* Sunshine yellow sparkles */
+      border-radius: 50%;
+      opacity: 0;
+    }
+    .about-content {
+      position: relative;
+      z-index: 10;
+      background: #FFFFFF;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 3rem;
+      max-width: 1000px;
+      margin: 3rem auto;
+      text-align: center;
+    }
+    .about-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #90EE90;
+      margin-bottom: 2rem;
+      opacity: 0;
+    }
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .team-member {
+      background: #D3D3D3;
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      opacity: 0;
+    }
+    .team-member img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      border: 3px solid #90EE90;
+    }
+    .team-member h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    .team-member p {
+      font-size: 1rem;
+      color: #333;
+    }
+    .navbar {
+      background: #FFFFFF;
+      border-bottom: 3px solid #D3D3D3;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .navbar a {
+      color: #333;
+      transition: color 0.3s ease;
+    }
+    .navbar a:hover {
+      color: #90EE90;
+    }
+    .footer-links a {
+      color: #333;
+      transition: color 0.3s ease;
+    }
+    .footer-links a:hover {
+      color: #90EE90;
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay and Particles -->
+  <div class="overlay"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-20 flex justify-between items-center px-8 py-4 navbar">
+    <div class="text-3xl font-bold tracking-wide text-[#90EE90]">SustainaCity</div>
+    <div class="space-x-8 text-lg">
+      <a href="index.html" class="hover:text-[#90EE90] transition">Home</a>
+      <a href="#game" class="hover:text-[#90EE90] transition">Game</a>
+      <a href="mission.html" class="hover:text-[#90EE90] transition">Mission</a>
+      <a href="about.html" class="hover:text-[#90EE90] transition">About Us</a>
+      <a href="#act" class="hover:text-[#90EE90] transition">Act</a>
+    </div>
+  </nav>
+
+  <!-- About Us Section -->
+  <div class="relative z-10 py-20">
+    <div class="about-content">
+      <h1 class="about-title">About Us</h1>
+      <p class="text-lg mb-6 text-[#333]">
+        Meet the awesome team behind SustainaCity! We’re a group of dreamers and creators who want to make the world a greener, happier place through fun games.
+      </p>
+      <div class="team-grid">
+        <div class="team-member">
+          <img src="WhatsApp Image 2025-02-20 at 11.30.57.jpeg" alt="Mayank Behera">
+          <h3>Mayank Behera</h3>
+          <p>Lead Designer</p>
+          <p>Mayank is the creative genius who makes SustainaCity look super cool! He loves designing fun worlds and making sure every kid has a blast playing our game.</p>
+        </div>
+        <div class="team-member">
+          <img src="sanjeev.png" alt="Ghattamaneni Lakshmi Sanjeev">
+          <h3>Ghattamaneni Lakshmi Sanjeev</h3>
+          <p>Game Developer</p>
+          <p>Lakshmi brings SustainaCity to life with her coding magic! She’s passionate about creating games that teach kids how to save the planet while having fun.</p>
+        </div>
+        <div class="team-member">
+          <img src="IMG_6078.jpeg" alt="Thotakura Naga Satya Surya Sai Rishikesh Varma">
+          <h3>Thotakura Naga Satya Surya Sai Rishikesh Varma</h3>
+          <p>Project Manager</p>
+          <p>Rishikesh keeps our team on track and makes sure SustainaCity is the best it can be! He loves working with kids and dreaming up new ways to make the world greener.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer id="act" class="relative z-10 py-10 bg-[#FFFFFF] text-center">
+    <h3 class="text-2xl font-bold mb-4 text-[#90EE90]">Take Action</h3>
+    <p class="text-lg mb-6 text-[#333]">Learn more and join the fight for a sustainable planet.</p>
+    <div class="footer-links space-x-6">
+      <a href="https://www.un.org/en/climatechange" target="_blank" class="text-lg">UN Climate</a>
+      <a href="https://www.greenpeace.org" target="_blank" class="text-lg">Greenpeace</a>
+      <a href="https://350.org" target="_blank" class="text-lg">350.org</a>
+    </div>
+  </footer>
+
+  <!-- JavaScript for Animations -->
+  <script>
+    // Create Floating Particles (Sparkles)
+    const particlesContainer = document.getElementById('particles');
+    const particleCount = 20;
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.top = `${Math.random() * 100}%`;
+      particlesContainer.appendChild(particle);
+
+      gsap.to(particle, {
+        opacity: 1,
+        x: Math.random() * 100 - 50,
+        y: Math.random() * 100 - 50,
+        duration: 5 + Math.random() * 5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: Math.random() * 2
+      });
+    }
+
+    // GSAP Animations for About Us Content
+    gsap.to('.about-title', {
+      opacity: 1,
+      y: -20,
+      duration: 1.5,
+      ease: 'bounce.out',
+      delay: 0.5
+    });
+    gsap.to('.team-member', {
+      opacity: 1,
+      y: -20,
+      duration: 1.5,
+      ease: 'bounce.out',
+      stagger: 0.3,
+      delay: 1
+    });
+  </script>
+</body>
+</html>

@@ -3,30 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SustainaCity - Build a Greener Tomorrow</title>
+  <title>NeoEarth - Shape a Sustainable Future</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- GSAP for animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <!-- Three.js for 3D effects -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <!-- Google Fonts: Montserrat for a clean, modern look -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Montserrat and Orbitron -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #4A5E6D 0%, #2A3B4D 100%);
+      background-color: #2E8B57;
+      background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1) 10px, transparent 10px, transparent 20px),
+                        radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+      background-size: 100% 100%, 20px 20px;
       font-family: 'Montserrat', sans-serif;
       overflow-x: hidden;
-      color: #E0F7FA;
+      color: #FFFFFF;
       margin: 0;
-    }
-    #holoCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      z-index: 1;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+      transition: background-color 1s ease;
     }
     .overlay {
       position: absolute;
@@ -34,41 +29,34 @@
       left: 0;
       width: 100%;
       height: 100vh;
-      background: rgba(74, 94, 109, 0.2); /* Blue-gray tint to match the game */
+      background: rgba(74, 94, 109, 0.2);
       pointer-events: none;
       z-index: 2;
     }
     .clock {
       font-size: 4rem;
       letter-spacing: 4px;
-      text-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
-      color: #E0F7FA;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      color: #FFFFFF;
       animation: pulse 2s infinite;
+      font-weight: 600;
     }
     @keyframes pulse {
       0% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.03); opacity: 0.9; }
       100% { transform: scale(1); opacity: 1; }
     }
-    .holo-title {
-      font-size: 4.5rem;
-      color: #E0F7FA;
-      text-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
-      opacity: 0;
-    }
     .holo-button {
-      position: relative;
-      z-index: 10;
       background: linear-gradient(90deg, #00E676, #00E5FF);
-      border: 2px solid #E0F7FA;
+      border: 2px solid #FFFFFF;
       border-radius: 50px;
       padding: 1rem 3rem;
       font-size: 1.5rem;
       font-weight: 700;
-      color: #E0F7FA;
+      color: #FFFFFF;
       text-transform: uppercase;
       letter-spacing: 2px;
-      text-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
       box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
       animation: glow 1.5s infinite alternate;
       transition: transform 0.3s ease;
@@ -81,198 +69,277 @@
       0% { box-shadow: 0 0 20px rgba(0, 230, 118, 0.4); }
       100% { box-shadow: 0 0 30px rgba(0, 230, 118, 0.6); }
     }
-    .footer-links a {
-      color: #80DEEA;
-      transition: color 0.3s ease;
+    .minecraft-button {
+      background: #8B5A2B;
+      border: 4px solid #654321;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      display: inline-block;
+      text-align: center;
+      transition: transform 0.2s;
+      font-weight: 600;
+      color: #FFFFFF;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
-    .footer-links a:hover {
-      color: #00E676;
+    .minecraft-button:hover {
+      transform: scale(1.1);
+    }
+    .blocky-container {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border: 5px solid #654321;
+      border-radius: 8px;
+    }
+    .mission-card {
+      background: linear-gradient(135deg, #1E3A8A, #10B981);
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+      transition: transform 0.3s ease;
+    }
+    .mission-card:hover {
+      transform: translateY(-10px);
+    }
+    .team-image {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid #10B981;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+    }
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #4CAF50, #81C784);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .main-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #4CAF50, #81C784);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .game-over {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #FF4444;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+      display: none;
+      margin-bottom: 2rem;
     }
   </style>
 </head>
 <body>
-  <!-- Holographic Canvas -->
-  <canvas id="holoCanvas"></canvas>
   <div class="overlay"></div>
 
   <!-- Navbar -->
-  <nav class="fixed top-0 w-full z-20 flex justify-between items-center px-8 py-4 bg-opacity-80 bg-gray-900">
-    <div class="text-3xl font-bold tracking-wide text-cyan-300">SustainaCity</div>
-    <div class="space-x-8 text-lg">
-      <a href="#game" class="hover:text-cyan-300 transition">Game</a>
-      <a href="#stats" class="hover:text-cyan-300 transition">Stats</a>
-      <a href="#mission" class="hover:text-cyan-300 transition">Mission</a>
-      <a href="#act" class="hover:text-cyan-300 transition">Act</a>
+  <nav class="fixed top-0 w-full z-20 flex justify-between items-center px-8 py-4 bg-black bg-opacity-80">
+    <div class="main-title">NeoEarth</div>
+    <div class="space-x-6">
+        <a href="#game" class="hover:text-green-500">Game</a>
+        <a href="#mission" class="hover:text-green-500">Mission</a>
+        <a href="#about" class="hover:text-green-500">About</a>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <div class="relative z-10 flex flex-col items-center justify-center h-screen text-center px-4">
-    <div id="clock" class="clock font-mono mb-10">10:00</div>
-    <h1 id="holo-title" class="holo-title">Build a Greener Tomorrow</h1>
-    <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-10 opacity-90">
-      Shape a sustainable future—your city’s fate hangs in the balance.
-    </p>
-    <a href="game.html" class="holo-button">Play Now</a>
+  <!-- Hero Section (With Doomsday Clock) -->
+  <div class="relative z-10 flex flex-col items-center justify-center h-screen text-center px-4" id="hero-section">
+    <div id="clock" class="clock font-mono mb-10">05:00</div>
+    <h1 class="hero-title">Shape a Sustainable Future</h1>
+    <p class="hero-subtitle max-w-lg">Collect Resources, Control Pollution, and Build a Green City.</p>
+    <div id="game-over" class="game-over">You were too late. The world is destroyed.</div>
+    <a href="#" class="minecraft-button mt-6" id="action-button">Start Building</a>
   </div>
 
-  <!-- Game Info Section -->
-  <section id="game" class="relative z-10 py-20 bg-gray-800 bg-opacity-70">
-    <div class="container mx-auto px-6 text-center">
-      <h2 class="text-4xl font-bold mb-6 text-cyan-200">The Game</h2>
-      <p class="text-lg max-w-2xl mx-auto mb-8">
-        In <span class="text-cyan-300">SustainaCity</span>, you’re the architect of a future metropolis. Balance energy, resources, and happiness—or watch pollution and despair take over.
-      </p>
-      <div class="flex justify-center space-x-6">
-        <div class="bg-gray-900 p-4 rounded-lg shadow-lg">
-          <img src="https://via.placeholder.com/150?text=Build" alt="Build" class="mb-2">
-          <p class="text-sm">Construct eco-friendly zones</p>
-        </div>
-        <div class="bg-gray-900 p-4 rounded-lg shadow-lg">
-          <img src="https://via.placeholder.com/150?text=Manage" alt="Manage" class="mb-2">
-          <p class="text-sm">Manage resources wisely</p>
-        </div>
-      </div>
+  <!-- Game Section -->
+  <section id="game" class="relative z-10 py-20">
+    <div class="container mx-auto text-center blocky-container">
+        <h2 class="section-title">The Game</h2>
+        <p class="section-subtitle">Craft buildings, use green energy, and balance resources to thrive!</p>
     </div>
   </section>
 
-  <!-- Sustainability Stats Section -->
-  <section id="stats" class="relative z-10 py-20 bg-opacity-70 bg-gray-900">
-    <div class="container mx-auto px-6 text-center">
-      <h2 class="text-4xl font-bold mb-6 text-cyan-200">The Stakes</h2>
-      <p class="text-lg max-w-2xl mx-auto mb-8">
-        Global warming is real. Your choices in-game mirror the real-world fight for sustainability.
-      </p>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-          <p class="text-3xl font-bold text-red-400">1.5°C</p>
-          <p class="text-sm">Critical warming limit</p>
+  <!-- Mission Section -->
+  <section id="mission" class="relative z-10 py-20 bg-gray-900">
+    <div class="container mx-auto text-center">
+      <h2 class="section-title mb-10">Our Mission</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+        <!-- Problem Statement -->
+        <div class="mission-card">
+          <h3 class="text-2xl font-bold text-white mb-4">The Challenge</h3>
+          <p class="text-lg">Futuristic urban planning struggles to balance economic growth, sustainability, and citizen well-being, often resulting in high pollution and low happiness. Existing simulation tools are complex and inaccessible, lacking real-time feedback for users to learn from their decisions.</p>
+          <img src="istockphoto-1471868963-612x612-2.jpg" alt="Polluted City" class="mt-4 rounded-lg shadow-lg">
         </div>
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-          <p class="text-3xl font-bold text-red-400">50%</p>
-          <p class="text-sm">CO2 cuts needed by 2030</p>
+        <!-- Target Audience -->
+        <div class="mission-card">
+          <h3 class="text-2xl font-bold text-white mb-4">Who We Serve</h3>
+          <p class="text-lg">Our solution is youth-centric but designed for everyone—empowering the next generation and beyond to rethink urban living with sustainability at its core.</p>
+          <img src="istockphoto-839295596-612x612.jpg" alt="Youth Building" class="mt-4 rounded-lg shadow-lg">
         </div>
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-          <p class="text-3xl font-bold text-red-400">2050</p>
-          <p class="text-sm">Net-zero goal deadline</p>
+        <!-- Proposed Solution -->
+        <div class="mission-card">
+          <h3 class="text-2xl font-bold text-white mb-4">Our Vision</h3>
+          <p class="text-lg">We’re crafting an interactive, user-friendly platform that educates through a 3D simulation aligned with the UN’s Sustainable Development Goals. Players make real-time energy and infrastructure choices, seeing their direct impact on urban sustainability.</p>
+          <img src="The top 10 green cities in the world-1.jpg" alt="Green City" class="mt-4 rounded-lg shadow-lg">
+        </div>
+        <!-- Validation -->
+        <div class="mission-card">
+          <h3 class="text-2xl font-bold text-white mb-4">Proof of Impact</h3>
+          <p class="text-lg">The game showcases long-term effects of urban planning—factories spike pollution, parks boost livability. We’ll validate success through user feedback, awareness shifts, and in-game data analysis, ensuring realistic cause-and-effect in city growth.</p>
+          <img src="Screenshot 2025-03-23 at 2.33.00 PM.png" alt="Data Analytics" class="mt-4 rounded-lg shadow-lg">
+        </div>
+      </div>
+      <a href="#" class="holo-button mt-10">Join the Movement</a>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="relative z-10 py-20">
+    <div class="container mx-auto text-center blocky-container">
+      <h2 class="section-title mb-10">About Us</h2>
+      <p class="text-lg mb-6">We are a passionate team of innovators dedicated to reshaping the future of urban living through education and technology.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <img src="WhatsApp Image 2025-02-20 at 11.30.57.jpeg" alt="Mayank Behera" class="team-image mx-auto mb-4">
+          <h3 class="text-xl font-bold">Mayank Behera</h3>
+          <p class="text-sm">Visionary leader driving sustainable innovation.</p>
+        </div>
+        <div>
+          <img src="sanjeev.png" alt="Sanjeev" class="team-image mx-auto mb-4">
+          <h3 class="text-xl font-bold">Ghattamaneni Lakshmi Sanjeev</h3>
+          <p class="text-sm">Tech wizard crafting immersive simulations.</p>
+        </div>
+        <div>
+          <img src="IMG_6078.jpeg" alt="Rishikesh" class="team-image mx-auto mb-4">
+          <h3 class="text-xl font-bold">Thotakura Naga Satya Surya Sai Rishikesh Varma</h3>
+          <p class="text-sm">Creative genius behind our bold designs.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer id="act" class="relative z-10 py-10 bg-gray-900 text-center">
-    <h3 class="text-2xl font-bold mb-4 text-cyan-200">Take Action</h3>
-    <p class="text-lg mb-6">Learn more and join the fight for a sustainable planet.</p>
-    <div class="footer-links space-x-6">
-      <a href="https://www.un.org/en/climatechange" target="_blank" class="text-lg">UN Climate</a>
-      <a href="https://www.greenpeace.org" target="_blank" class="text-lg">Greenpeace</a>
-      <a href="https://350.org" target="_blank" class="text-lg">350.org</a>
+  <footer id="act" class="relative z-10 py-10 bg-black text-center">
+    <h3 class="text-2xl">Take Action</h3>
+    <p class="text-lg mt-4">Join real-world efforts for sustainability.</p>
+    <div class="space-x-6 mt-6">
+        <a href="#" class="hover:text-green-500">UN Climate</a>
+        <a href="#" class="hover:text-green-500">Greenpeace</a>
     </div>
   </footer>
 
-  <!-- JavaScript for Holographic Effects, Countdown, and Animations -->
+  <!-- JavaScript for Color Transition and Animations -->
   <script>
-    // Initialize Three.js Scene for Holographic Earth
-    let scene, camera, renderer, earth, rings, grid;
-    function initHolo() {
-      // Scene
-      scene = new THREE.Scene();
+    let timeLeft = 300; // 5 minutes in seconds
+    let pollutionLevel = 0;
+    const maxTime = 300;
+    let timerInterval;
 
-      // Camera
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
-
-      // Renderer
-      renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('holoCanvas'), alpha: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(window.devicePixelRatio);
-
-      // Background Grid (to match the game's grid)
-      const gridGeometry = new THREE.PlaneGeometry(50, 50, 50, 50);
-      const gridMaterial = new THREE.MeshBasicMaterial({
-        color: 0x00FF00,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.1
-      });
-      grid = new THREE.Mesh(gridGeometry, gridMaterial);
-      grid.position.z = -10;
-      scene.add(grid);
-
-      // Earth
-      const geometry = new THREE.SphereGeometry(1.5, 64, 64);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0x00FF00, // Green for sustainability
-        emissive: 0x00E5FF, // Blue glow for tech
-        emissiveIntensity: 0.2,
-        transparent: true,
-        opacity: 0.7,
-      });
-      earth = new THREE.Mesh(geometry, material);
-      scene.add(earth);
-
-      // Orbital Rings
-      const ringGeometry = new THREE.RingGeometry(2, 2.1, 64);
-      const ringMaterial = new THREE.MeshBasicMaterial({ color: 0x00E5FF, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
-      rings = new THREE.Mesh(ringGeometry, ringMaterial);
-      rings.rotation.x = Math.PI / 2;
-      scene.add(rings);
-
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0xE0F7FA, 0.5);
-      scene.add(ambientLight);
-      const pointLight = new THREE.PointLight(0x00E5FF, 1.5, 100);
-      pointLight.position.set(5, 5, 5);
-      scene.add(pointLight);
-
-      // Red glow on the polluted side
-      const redLight = new THREE.PointLight(0xFF4444, 1, 100);
-      redLight.position.set(-5, 0, 0); // Positioned on the left side of the Earth
-      scene.add(redLight);
-
-      // Handle window resize
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    }
-
-    // Animate the Holographic Scene
-    function animateHolo() {
-      requestAnimationFrame(animateHolo);
-      earth.rotation.y += 0.005;
-      rings.rotation.z += 0.01;
-      grid.rotation.z += 0.001;
-      renderer.render(scene, camera);
-    }
-
-    // Initialize the holographic scene
-    initHolo();
-    animateHolo();
-
-    // Countdown Timer
-    let timeLeft = 600; // 10 minutes in seconds
     const clock = document.getElementById('clock');
+    const actionButton = document.getElementById('action-button');
+    const gameOverText = document.getElementById('game-over');
+    const heroSection = document.getElementById('hero-section');
+
+    function updateBackground() {
+      pollutionLevel = 1 - (timeLeft / maxTime);
+      const r = Math.floor(46 * (1 - pollutionLevel) + 10 * pollutionLevel);
+      const g = Math.floor(139 * (1 - pollutionLevel) + 20 * pollutionLevel);
+      const b = Math.floor(87 * (1 - pollutionLevel) + 40 * pollutionLevel);
+      document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    }
 
     function updateClock() {
       const minutes = Math.floor(timeLeft / 60);
       const seconds = timeLeft % 60;
       clock.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
       timeLeft--;
+      updateBackground();
 
       if (timeLeft < 0) {
-        timeLeft = 600;
-        alert("Time’s up! The future’s yours to rewrite.");
+        clearInterval(timerInterval);
+        clock.style.display = 'none';
+        heroSection.querySelector('h1').style.display = 'none';
+        heroSection.querySelector('p').style.display = 'none';
+        gameOverText.style.display = 'block';
+        actionButton.textContent = 'Retry';
       }
     }
 
-    setInterval(updateClock, 1000);
+    function startTimer() {
+      timerInterval = setInterval(updateClock, 1000);
+    }
+    startTimer();
 
-    // GSAP Animations
-    // Typewriter effect for the title
-    const title = document.getElementById('holo-title');
+    function resetGame() {
+      clearInterval(timerInterval);
+      timeLeft = 300;
+      pollutionLevel = 0;
+      clock.style.display = 'block';
+      heroSection.querySelector('h1').style.display = 'block';
+      heroSection.querySelector('p').style.display = 'block';
+      gameOverText.style.display = 'none';
+      actionButton.textContent = 'Start Building';
+      updateBackground();
+      startTimer();
+
+      gsap.to('.clock', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
+      gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 2.5, ease: 'power2.out' });
+      gsap.to('.minecraft-button', { 
+        y: -20, 
+        duration: 2, 
+        repeat: -1, 
+        yoyo: true, 
+        ease: 'sine.inOut',
+        delay: 3
+      });
+
+      const title = heroSection.querySelector('h1');
+      const text = "Shape a Sustainable Future";
+      title.textContent = '';
+      title.style.opacity = 1;
+      let i = 0;
+      function typeWriter() {
+        if (i < text.length) {
+          title.textContent += text.charAt(i);
+          i++;
+          setTimeout(typeWriter, 100);
+        }
+      }
+      setTimeout(typeWriter, 1000);
+    }
+
+    actionButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (actionButton.textContent === 'Retry') {
+        resetGame();
+      }
+    });
+
+    gsap.to('.clock', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
+    gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 2.5, ease: 'power2.out' });
+    gsap.to('.minecraft-button', { 
+      y: -20, 
+      duration: 2, 
+      repeat: -1, 
+      yoyo: true, 
+      ease: 'sine.inOut',
+      delay: 3
+    });
+
+    const title = heroSection.querySelector('h1');
     const text = title.textContent;
     title.textContent = '';
     title.style.opacity = 1;
@@ -285,18 +352,6 @@
       }
     }
     setTimeout(typeWriter, 1000);
-
-    // Animate other elements
-    gsap.to('.clock', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
-    gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 2.5, ease: 'power2.out' });
-    gsap.to('.holo-button', { 
-      y: -20, 
-      duration: 2, 
-      repeat: -1, 
-      yoyo: true, 
-      ease: 'sine.inOut',
-      delay: 3
-    });
   </script>
 </body>
 </html>
