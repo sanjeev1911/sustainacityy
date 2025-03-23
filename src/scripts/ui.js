@@ -1,90 +1,72 @@
-import { Game } from './game';
-import playIconUrl from '/icons/play-color.png';
-import pauseIconUrl from '/icons/pause-color.png';
-
-// Building costs and effects (mirrors game.js)
-const buildingCosts = {
-  residential: { cost: 150, revenuePerTick: 0, pollution: 0, happiness: 5 },
-  commercial: { cost: 225, revenuePerTick: 25, pollution: 2, happiness: 0 },
-  industrial: { cost: 375, revenuePerTick: 60, pollution: 10, happiness: -5 },
-  road: { cost: 40, revenuePerTick: 0, pollution: 1, happiness: 2 },
-  'power-plant': { cost: 750, revenuePerTick: 0, pollution: 15, happiness: -5 },
-  'power-line': { cost: 75, revenuePerTick: 0, pollution: 0, happiness: 0 },
-  bulldoze: { cost: 0, revenuePerTick: 0, pollution: 0, happiness: 0 },
-  select: { cost: 0, revenuePerTick: 0, pollution: 0, happiness: 0 }
-};
-
 export class GameUI {
-  activeToolId = 'select';
-  selectedControl = document.getElementById('button-select');
-  isPaused = false;
+  constructor() {
+    this.gameWindow = document.getElementById('render-target');
+    this.activeToolId = 'select'; // Default tool
+    this.isPaused = false;
 
-  get gameWindow() {
-    return document.getElementById('render-target');
-  }
+    // Bind event listeners for toolbar buttons
+    document.querySelectorAll('.ui-button').forEach(button => {
+      button.addEventListener('click', this.onToolSelected.bind(this));
+    });
 
-  showLoadingText() {
-    document.getElementById('loading').style.visibility = 'visible';
-  }
-
-  hideLoadingText() {
-    document.getElementById('loading').style.visibility = 'hidden';
+    // Bind pause toggle
+    const pauseButton = document.getElementById('button-pause');
+    if (pauseButton) {
+      pauseButton.addEventListener('click', this.togglePause.bind(this));
+    }
   }
 
   onToolSelected(event) {
-    if (this.selectedControl) {
-      this.selectedControl.classList.remove('selected');
-    }
-    this.selectedControl = event.target.closest('.ui-button');
-    this.selectedControl.classList.add('selected');
+    const toolId = event.currentTarget.getAttribute('data-type');
+    if (toolId) {
+      console.log('Tool selected:', toolId);
+      window.game.setTool(toolId); // Call Game’s setTool method
+      this.activeToolId = toolId;
 
-    this.activeToolId = this.selectedControl.getAttribute('data-type');
-    window.game.setTool(this.activeToolId);
-
-    const type = this.activeToolId;
-    const buildingCost = buildingCosts[type].cost;
-
-    if (buildingCost > 0 && window.game.focusedObject) {
-      const { x, y } = window.game.focusedObject;
-      window.game.placeBuilding(x, y, type);
-    } else if (buildingCost > 0) {
-      console.log(`No valid location selected to place ${type}!`);
-      window.showNotification(`No valid location selected to place ${type}!`);
+      // Update button styles
+      document.querySelectorAll('.ui-button').forEach(button => {
+        button.classList.remove('selected');
+      });
+      event.currentTarget.classList.add('selected');
     }
   }
 
   togglePause() {
     this.isPaused = !this.isPaused;
-    window.game.togglePause();
-    if (this.isPaused) {
-      document.getElementById('pause-button-icon').src = playIconUrl;
-      document.getElementById('paused-text').style.visibility = 'visible';
-    } else {
-      document.getElementById('pause-button-icon').src = pauseIconUrl;
-      document.getElementById('paused-text').style.visibility = 'hidden';
+    const pausedText = document.getElementById('paused-text');
+    const pauseIcon = document.getElementById('pause-button-icon');
+    if (pausedText) {
+      pausedText.style.visibility = this.isPaused ? 'visible' : 'hidden';
     }
-    if (window.updateMetrics) window.updateMetrics();
+    if (pauseIcon) {
+      pauseIcon.src = this.isPaused ? '/icons/play-color.png' : '/icons/pause-color.png';
+    }
+    console.log('Simulation paused:', this.isPaused);
   }
 
   updateTitleBar(game) {
-    document.getElementById('city-name').innerHTML = game.city.name;
-    document.getElementById('population-counter').innerHTML = game.city.population;
-    const date = new Date('1/1/2023');
-    date.setDate(date.getDate() + game.city.simTime);
-    document.getElementById('sim-time').innerHTML = date.toLocaleDateString();
-    if (window.updateMetrics) window.updateMetrics();
+    if (!game) return;
+    window.updateMetrics(); // Leverage game.html’s updateMetrics function
   }
 
-  updateInfoPanel(object) {
-    const infoElement = document.getElementById('info-panel');
-    if (object) {
-      infoElement.style.visibility = 'visible';
-      infoElement.innerHTML = object.toHTML();
+  updateInfoPanel(selectedObject) {
+    const infoPanel = document.getElementById('info-panel');
+    if (!infoPanel) return;
+
+    if (selectedObject && typeof selectedObject.toHTML === 'function') {
+      infoPanel.innerHTML = selectedObject.toHTML();
     } else {
-      infoElement.style.visibility = 'hidden';
-      infoElement.innerHTML = '';
+      infoPanel.innerHTML = '<p>No object selected</p>';
+    }
+  }
+
+  hideLoadingText() {
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+      loadingElement.style.display = 'none';
     }
   }
 }
 
+// Initialize UI and expose globally
 window.ui = new GameUI();

@@ -9,85 +9,37 @@
   <script type="module" src="./scripts/game.js"></script>
   <script type="module" src="./scripts/ui.js"></script>
   <style>
-    .metric {
-      display: flex;
-      align-items: center;
-      margin: 0 10px;
-      color: #fff;
-      font-size: 1rem;
-      position: relative;
-    }
-    .metric span.emoji {
-      font-size: 1.2rem;
-      margin-right: 5px;
-    }
-    .progress-bar {
-      width: 100px;
-      height: 10px;
-      background: #333;
-      border-radius: 5px;
-      overflow: hidden;
-      margin-left: 5px;
-      position: relative;
-    }
-    .progress-fill {
-      height: 100%;
-      transition: width 0.5s ease;
-    }
+    .metric { display: flex; align-items: center; margin: 0 10px; color: #fff; font-size: 1rem; position: relative; }
+    .metric span.emoji { font-size: 1.2rem; margin-right: 5px; }
+    .progress-bar { width: 100px; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-left: 5px; position: relative; }
+    .progress-fill { height: 100%; transition: width 0.5s ease; }
     .pollution .progress-fill { background: #8b4513; }
     .happiness .progress-fill { background: #ffd700; }
     .lifespan .progress-fill { background: #00cc99; }
-    #render-target {
-      width: 100vw;
-      height: 100vh;
-    }
-    .tooltip {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 0.8rem;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .progress-bar:hover .tooltip {
-      visibility: visible;
-    }
-    #notification {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255, 0, 0, 0.9);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      z-index: 1000;
-      visibility: hidden;
-      text-align: center;
-    }
+    #render-target { width: 100vw; height: 100vh; }
+    .tooltip { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.8); color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; visibility: hidden; pointer-events: none; }
+    .progress-bar:hover .tooltip { visibility: visible; }
+    #notification { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 0, 0, 0.9); color: white; padding: 10px 20px; border-radius: 5px; z-index: 1000; visibility: hidden; text-align: center; }
+    #dashboard { position: fixed; bottom: 10px; right: 10px; background: rgba(0, 0, 0, 0.8); color: #fff; padding: 10px; border-radius: 5px; width: 250px; font-size: 0.9rem; }
+    #dashboard h3 { margin: 0 0 5px; cursor: pointer; }
+    #dashboard-content { display: none; }
+    #dashboard-content.show { display: block; }
+    #dashboard ul { list-style: none; padding: 0; margin: 0; }
+    #dashboard li { margin: 5px 0; }
   </style>
 </head>
 <body>
   <div id="root-window">
     <div id="render-target"></div>
-    <div id="loading" class="text-overlay">
-      <div>LOADING...</div>
-    </div>
-    <div id="paused-text" class="text-overlay" style="visibility: hidden;">
-      <div>PAUSED</div>
-    </div>
+    <div id="loading" class="text-overlay"><div>LOADING...</div></div>
+    <div id="paused-text" class="text-overlay" style="visibility: hidden;"><div>PAUSED</div></div>
     <div id="notification"></div>
     <div id="ui">
       <div id="title-bar">
         <div class="title-bar-left-items title-bar-items">
           <div class="metric">
             <span class="emoji">💰</span>
-            <span id="revenue-counter">$10000</span>
+            <span id="revenue-counter">$100000</span>
             <span id="maintenance-cost" style="margin-left: 5px; color: #ff5555;">(-$0)</span>
           </div>
           <div class="metric pollution">
@@ -99,9 +51,7 @@
           </div>
         </div>
         <div class="title-bar-center-items title-bar-items">
-          <span id="city-name">My City</span>
-          <span> - </span>
-          <span id="sim-time">1/1/2023</span>
+          <span id="city-name">My City</span><span> - </span><span id="sim-time">1/1/2023</span>
         </div>
         <div class="title-bar-right-items title-bar-items">
           <div class="metric">
@@ -125,76 +75,110 @@
         </div>
       </div>
       <div id="ui-toolbar" class="container">
-        <button id="button-select" class="ui-button selected" data-type="select" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/select-color.png">
-        </button>
-        <button id="button-bulldoze" class="ui-button" data-type="bulldoze" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/bulldozer-color.png">
-        </button>
-        <button id="button-residential" class="ui-button" data-type="residential" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/house-color.png">
-        </button>
-        <button id="button-commercial" class="ui-button" data-type="commercial" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/store-color.png">
-        </button>
-        <button id="button-industrial" class="ui-button" data-type="industrial" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/factory-color.png">
-        </button>
-        <button id="button-road" class="ui-button" data-type="road" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/road-color.png">
-        </button>
-        <button id="button-power-plant" class="ui-button" data-type="power-plant" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/power-color.png">
-        </button>
-        <button id="button-power-line" class="ui-button" data-type="power-line" onclick="ui.onToolSelected(event)">
-          <img class="toolbar-icon" src="/icons/power-line-color.png">
-        </button>
-        <button id="button-pause" class="ui-button" onclick="ui.togglePause()">
-          <img id="pause-button-icon" class="toolbar-icon" src="/icons/pause-color.png">
-        </button>
+        <button id="button-select" class="ui-button selected" data-type="select" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/select-color.png"></button>
+        <button id="button-bulldoze" class="ui-button" data-type="bulldoze" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/bulldozer-color.png"></button>
+        <button id="button-residential" class="ui-button" data-type="residential" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/house-color.png"></button>
+        <button id="button-commercial" class="ui-button" data-type="commercial" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/store-color.png"></button>
+        <button id="button-industrial" class="ui-button" data-type="industrial" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/factory-color.png"></button>
+        <button id="button-road" class="ui-button" data-type="road" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/road-color.png"></button>
+        <button id="button-power-plant" class="ui-button" data-type="power-plant" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/power-color.png"></button>
+        <button id="button-power-line" class="ui-button" data-type="power-line" onclick="window.ui.onToolSelected(event)"><img class="toolbar-icon" src="/icons/power-line-color.png"></button>
+        <button id="button-pause" class="ui-button" onclick="window.ui.togglePause()"><img id="pause-button-icon" class="toolbar-icon" src="/icons/pause-color.png"></button>
       </div>
       <div id="info-panel" class="container"></div>
-      <div id="instructions">
-        INTERACT - Left Mouse<br>
-        ROTATE - Right Mouse<br>
-        PAN - Ctrl + Right Mouse<br>
-        ZOOM - Scroll
-      </div>
+      <div id="instructions">INTERACT - Left Mouse<br>ROTATE - Right Mouse<br>PAN - Ctrl + Right Mouse<br>ZOOM - Scroll</div>
       <div id="version">v0.3.0</div>
+    </div>
+    <!-- New Dashboard -->
+    <div id="dashboard">
+      <h3 onclick="document.getElementById('dashboard-content').classList.toggle('show')">City Dashboard ▼</h3>
+      <div id="dashboard-content">
+        <ul>
+          <li>Revenue: $<span id="dash-revenue">100000</span> (Taxes: $<span id="dash-tax">0</span>)</li>
+          <li>Pollution: <span id="dash-pollution">0</span>% (Roads: <span id="dash-pollution-roads">0</span>%)</li>
+          <li>Happiness: <span id="dash-happiness">50</span>% (Trend: <span id="dash-happiness-trend">Stable</span>)</li>
+          <li>Lifespan: <span id="dash-lifespan">80</span> years</li>
+          <li>Buildings: <span id="dash-building-count">0</span></li>
+        </ul>
+      </div>
     </div>
   </div>
 
   <script>
+    let lastHappiness = 50; // Track for trend
     function updateMetrics() {
       const game = window.game;
       if (!game) return;
 
-      game.pollution = Math.max(0, Math.min(100, game.pollution));
-      game.happiness = Math.max(0, Math.min(100, game.happiness));
-      game.lifespan = Math.max(10, 80 - game.pollution * 0.3 - (game.happiness < 50 ? (50 - game.happiness) * 0.2 : 0));
+      // Use game’s precomputed values instead of recalculating
+      const revenue = Math.floor(game.revenue || 0);
+      const maintenanceCost = Math.floor(game.maintenanceCost || 0);
+      const pollution = Math.floor(Math.max(0, Math.min(100, game.pollution || 0)));
+      const happiness = Math.floor(Math.max(0, Math.min(100, game.happiness || 0)));
+      const lifespan = Math.floor(game.lifespan || 0);
+      const population = game.city.population || 0;
+      const taxRevenue = population * 0.5;
+      const roadPollution = (game.buildingCounts.road || 0) * 1; // 1 pollution per road from game.js
 
-      document.getElementById('revenue-counter').textContent = `$${Math.floor(game.revenue)}`;
-      document.getElementById('maintenance-cost').textContent = `(-$${Math.floor(game.maintenanceCost)})`;
-      document.querySelector('.pollution .progress-fill').style.width = `${game.pollution}%`;
-      document.querySelector('.happiness .progress-fill').style.width = `${game.happiness}%`;
-      document.querySelector('.lifespan .progress-fill').style.width = `${(game.lifespan / 80) * 100}%`;
+      // Title bar updates
+      const revenueCounter = document.getElementById('revenue-counter');
+      const maintenanceCostEl = document.getElementById('maintenance-cost');
+      const pollutionFill = document.querySelector('.pollution .progress-fill');
+      const happinessFill = document.querySelector('.happiness .progress-fill');
+      const lifespanFill = document.querySelector('.lifespan .progress-fill');
+      const pollutionTooltip = document.getElementById('pollution-tooltip');
+      const happinessTooltip = document.getElementById('happiness-tooltip');
+      const lifespanTooltip = document.getElementById('lifespan-tooltip');
+      const populationCounter = document.getElementById('population-counter');
 
-      document.getElementById('pollution-tooltip').textContent = `${Math.floor(game.pollution)}%`;
-      document.getElementById('happiness-tooltip').textContent = `${Math.floor(game.happiness)}%`;
-      document.getElementById('lifespan-tooltip').textContent = `${Math.floor(game.lifespan)} years`;
+      if (revenueCounter) revenueCounter.textContent = `$${revenue}`;
+      if (maintenanceCostEl) maintenanceCostEl.textContent = `(-$${maintenanceCost})`;
+      if (pollutionFill) pollutionFill.style.width = `${pollution}%`;
+      if (happinessFill) happinessFill.style.width = `${happiness}%`;
+      if (lifespanFill) lifespanFill.style.width = `${(lifespan / 80) * 100}%`;
+      if (pollutionTooltip) pollutionTooltip.textContent = `${pollution}%`;
+      if (happinessTooltip) happinessTooltip.textContent = `${happiness}%`;
+      if (lifespanTooltip) lifespanTooltip.textContent = `${lifespan} years`;
+      if (populationCounter) populationCounter.textContent = population;
+
+      // Dashboard updates
+      const dashRevenue = document.getElementById('dash-revenue');
+      const dashTax = document.getElementById('dash-tax');
+      const dashPollution = document.getElementById('dash-pollution');
+      const dashPollutionRoads = document.getElementById('dash-pollution-roads');
+      const dashHappiness = document.getElementById('dash-happiness');
+      const dashHappinessTrend = document.getElementById('dash-happiness-trend');
+      const dashLifespan = document.getElementById('dash-lifespan');
+      const dashBuildingCount = document.getElementById('dash-building-count');
+
+      if (dashRevenue) dashRevenue.textContent = revenue;
+      if (dashTax) dashTax.textContent = Math.floor(taxRevenue);
+      if (dashPollution) dashPollution.textContent = pollution;
+      if (dashPollutionRoads) dashPollutionRoads.textContent = roadPollution.toFixed(1);
+      if (dashHappiness) dashHappiness.textContent = happiness;
+      if (dashHappinessTrend) {
+        dashHappinessTrend.textContent = happiness > lastHappiness ? 'Rising' : happiness < lastHappiness ? 'Falling' : 'Stable';
+      }
+      if (dashLifespan) dashLifespan.textContent = lifespan;
+      if (dashBuildingCount) dashBuildingCount.textContent = game.buildings.length || 0;
+
+      lastHappiness = happiness;
     }
 
     function showNotification(message) {
       const notification = document.getElementById('notification');
-      notification.textContent = message;
-      notification.style.visibility = 'visible';
-      setTimeout(() => {
-        notification.style.visibility = 'hidden';
-      }, 2000);
+      if (notification) {
+        notification.textContent = message;
+        notification.style.visibility = 'visible';
+        setTimeout(() => notification.style.visibility = 'hidden', 2000);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       updateMetrics();
+      // Ensure UI event handlers use window.ui
+      window.showNotification = showNotification;
+      window.updateMetrics = updateMetrics;
     });
   </script>
 </body>

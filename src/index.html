@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Future City</title>
+  <title>SustainaCity - Build a Greener Tomorrow</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- GSAP for animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Google Fonts: Montserrat for a modern, clean look -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      font-family: 'Poppins', sans-serif;
-      overflow: hidden;
+      background: linear-gradient(135deg, #1a3c34 0%, #0a2b3f 100%);
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      color: #e0f7fa;
     }
     .split-bg {
       position: absolute;
@@ -20,16 +23,17 @@
       width: 50%;
       height: 100vh;
       transition: all 0.5s ease;
+      z-index: 1;
     }
     .utopia {
       left: 0;
       background: url('https://i.pinimg.com/736x/17/f2/49/17f249b99582b9a8bc4b4e3512f5653e.jpg') no-repeat center/cover;
-      filter: brightness(1.1);
+      filter: brightness(1.1) saturate(1.2);
     }
     .dystopia {
       right: 0;
       background: url('https://markmanson.net/wp-content/uploads/2018/12/5-books-explaining-why-everything-is-fucked.jpg') no-repeat center/cover;
-      filter: grayscale(0.8) brightness(0.7);
+      filter: grayscale(0.8) brightness(0.7) contrast(1.1);
     }
     .overlay {
       position: absolute;
@@ -37,64 +41,133 @@
       left: 0;
       width: 100%;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.4);
       pointer-events: none;
+      z-index: 2;
     }
     .clock {
-      font-size: 4rem;
-      letter-spacing: 2px;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      font-size: 4.5rem;
+      letter-spacing: 4px;
+      text-shadow: 0 0 25px rgba(0, 255, 204, 0.7);
+      color: #00e5ff;
     }
     .btn-glow {
-      background: linear-gradient(90deg, #00ffcc, #00ccff);
-      box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+      background: linear-gradient(90deg, #00e676, #00d4ff);
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.6), 0 0 30px rgba(0, 212, 255, 0.4);
       transition: all 0.3s ease;
-      opacity: 1; /* Ensure visibility */
-      display: inline-block;
+      border: 2px solid #00e676;
+      border-radius: 50px;
+      padding: 0.75rem 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     .btn-glow:hover {
-      box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
+      box-shadow: 0 0 25px rgba(0, 230, 118, 0.9), 0 0 40px rgba(0, 212, 255, 0.7);
       transform: scale(1.05);
+    }
+    .cloud {
+      position: absolute;
+      opacity: 0.3;
+      z-index: 3;
+    }
+    .footer-links a {
+      color: #80deea;
+      transition: color 0.3s ease;
+    }
+    .footer-links a:hover {
+      color: #00e676;
     }
   </style>
 </head>
-<body class="text-white">
+<body>
   <!-- Split Background -->
   <div class="split-bg utopia"></div>
   <div class="split-bg dystopia"></div>
   <div class="overlay"></div>
 
+  <!-- Animated Clouds -->
+  <div class="cloud" style="top: 10%; left: 5%;"><img src="https://cdn-icons-png.flaticon.com/512/414/414927.png" alt="cloud" width="100"></div>
+  <div class="cloud" style="top: 20%; right: 10%;"><img src="https://cdn-icons-png.flaticon.com/512/414/414927.png" alt="cloud" width="80"></div>
+
   <!-- Navbar -->
-  <nav class="fixed top-0 w-full z-20 flex justify-between items-center px-8 py-4">
-    <div class="text-2xl font-bold tracking-wide">Future City</div>
-    <div class="space-x-6">
-      <a href="#" class="hover:text-cyan-300 transition">Play</a>
-      <a href="#" class="hover:text-cyan-300 transition">Data</a>
-      <a href="#" class="hover:text-cyan-300 transition">Vision</a>
-      <a href="#" class="hover:text-cyan-300 transition">Act</a>
+  <nav class="fixed top-0 w-full z-20 flex justify-between items-center px-8 py-4 bg-opacity-80 bg-gray-900">
+    <div class="text-3xl font-bold tracking-wide text-cyan-300">SustainaCity</div>
+    <div class="space-x-8 text-lg">
+      <a href="#game" class="hover:text-cyan-300 transition">Game</a>
+      <a href="#stats" class="hover:text-cyan-300 transition">Stats</a>
+      <a href="#mission" class="hover:text-cyan-300 transition">Mission</a>
+      <a href="#act" class="hover:text-cyan-300 transition">Act</a>
     </div>
   </nav>
 
-  <!-- Main Content -->
-  <div class="relative z-10 flex flex-col items-center justify-center h-screen text-center">
-    <!-- Countdown Clock -->
-    <div id="clock" class="clock text-cyan-300 font-mono mb-8">10:00</div>
-
-    <!-- Headline -->
-    <h1 class="text-5xl md:text-7xl font-extrabold mb-4 leading-tight">
-      Your Choices Shape Tomorrow
+  <!-- Hero Section -->
+  <div class="relative z-10 flex flex-col items-center justify-center h-screen text-center px-4">
+    <div id="clock" class="clock font-mono mb-10">10:00</div>
+    <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-shadow-lg">
+      Build a Greener Tomorrow
     </h1>
-
-    <!-- Subtext -->
-    <p class="text-lg md:text-xl max-w-2xl mx-auto mb-8 opacity-80">
-      Build a sustainable city or watch it crumble—every energy decision counts as the clock ticks down.
+    <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-10 opacity-90">
+      Shape a sustainable future or face the consequences—your city’s fate hangs on every eco-choice.
     </p>
-
-    <!-- Call to Action (Play the Game button) -->
-    <a href="game.html" class="btn-glow text-lg font-semibold py-3 px-8 rounded-full text-black">
-      Play the Game
-    </a>
+    <a href="game.html" class="btn-glow text-lg">Play Now</a>
   </div>
+
+  <!-- Game Info Section -->
+  <section id="game" class="relative z-10 py-20 bg-gray-800 bg-opacity-70">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-4xl font-bold mb-6 text-cyan-200">The Game</h2>
+      <p class="text-lg max-w-2xl mx-auto mb-8">
+        In <span class="text-cyan-300">SustainaCity</span>, you’re the architect of a future metropolis. Balance energy, resources, and happiness—or watch pollution and despair take over.
+      </p>
+      <div class="flex justify-center space-x-6">
+        <div class="bg-gray-900 p-4 rounded-lg shadow-lg">
+          <img src="https://via.placeholder.com/150?text=Build" alt="Build" class="mb-2">
+          <p class="text-sm">Construct eco-friendly zones</p>
+        </div>
+        <div class="bg-gray-900 p-4 rounded-lg shadow-lg">
+          <img src="https://via.placeholder.com/150?text=Manage" alt="Manage" class="mb-2">
+          <p class="text-sm">Manage resources wisely</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sustainability Stats Section -->
+  <section id="stats" class="relative z-10 py-20 bg-opacity-70 bg-gray-900">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-4xl font-bold mb-6 text-cyan-200">The Stakes</h2>
+      <p class="text-lg max-w-2xl mx-auto mb-8">
+        Global warming is real. Your choices in-game mirror the real-world fight for sustainability.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <p class="text-3xl font-bold text-red-400">1.5°C</p>
+          <p class="text-sm">Critical warming limit</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <p class="text-3xl font-bold text-red-400">50%</p>
+          <p class="text-sm">CO2 cuts needed by 2030</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <p class="text-3xl font-bold text-red-400">2050</p>
+          <p class="text-sm">Net-zero goal deadline</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="act" class="relative z-10 py-10 bg-gray-900 text-center">
+    <h3 class="text-2xl font-bold mb-4 text-cyan-200">Take Action</h3>
+    <p class="text-lg mb-6">Learn more and join the fight for a sustainable planet.</p>
+    <div class="footer-links space-x-6">
+      <a href="https://www.un.org/en/climatechange" target="_blank" class="text-lg">UN Climate</a>
+      <a href="https://www.greenpeace.org" target="_blank" class="text-lg">Greenpeace</a>
+      <a href="https://350.org" target="_blank" class="text-lg">350.org</a>
+    </div>
+  </footer>
 
   <!-- JavaScript for Countdown and Animations -->
   <script>
@@ -105,39 +178,21 @@
     function updateClock() {
       const minutes = Math.floor(timeLeft / 60);
       const seconds = timeLeft % 60;
-      clock.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`; // Fixed template literal syntax
+      clock.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
       timeLeft--;
 
       if (timeLeft < 0) {
-        timeLeft = 600; // Reset
+        timeLeft = 600;
         alert("Time’s up! The future’s yours to rewrite.");
       }
     }
 
     setInterval(updateClock, 1000);
 
-    // GSAP Animations (using reliable 'to' method)
-    gsap.to('.clock', { 
-      opacity: 1, 
-      y: 0, 
-      duration: 1, 
-      delay: 0.5, 
-      ease: 'power2.out' 
-    });
-    gsap.to('h1', { 
-      opacity: 1, 
-      y: 0, 
-      duration: 1, 
-      delay: 1, 
-      ease: 'power2.out' 
-    });
-    gsap.to('p', { 
-      opacity: 0.8, 
-      y: 0, 
-      duration: 1, 
-      delay: 1.5, 
-      ease: 'power2.out' 
-    });
+    // GSAP Animations
+    gsap.to('.clock', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
+    gsap.to('h1', { opacity: 1, y: 0, duration: 1, delay: 1, ease: 'power2.out' });
+    gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 1.5, ease: 'power2.out' });
     gsap.to('.btn-glow', { 
       opacity: 1, 
       scale: 1, 
@@ -146,8 +201,16 @@
       ease: 'power2.out',
       onComplete: () => console.log('Button animation completed')
     });
+    gsap.to('.btn-glow', { 
+      boxShadow: '0 0 20px rgba(0, 230, 118, 0.8), 0 0 40px rgba(0, 212, 255, 0.6)', 
+      duration: 1.5, 
+      repeat: -1, 
+      yoyo: true, 
+      ease: 'sine.inOut' 
+    });
+    gsap.to('.cloud', { x: 50, duration: 10, repeat: -1, yoyo: true, ease: 'linear' });
 
-    // Hover effect on split backgrounds
+    // Hover effects on split backgrounds
     document.querySelector('.utopia').addEventListener('mouseenter', () => {
       gsap.to('.utopia', { width: '60%', duration: 0.5 });
       gsap.to('.dystopia', { width: '40%', duration: 0.5 });
@@ -156,8 +219,11 @@
       gsap.to('.utopia', { width: '40%', duration: 0.5 });
       gsap.to('.dystopia', { width: '60%', duration: 0.5 });
     });
-    document.querySelector('.split-bg').addEventListener('mouseleave', () => {
-      gsap.to('.split-bg', { width: '50%', duration: 0.5 });
+    document.body.addEventListener('mouseleave', (e) => {
+      if (!e.target.closest('.split-bg')) {
+        gsap.to('.utopia', { width: '50%', duration: 0.5 });
+        gsap.to('.dystopia', { width: '50%', duration: 0.5 });
+      }
     });
   </script>
 </body>
