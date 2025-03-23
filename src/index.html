@@ -8,32 +8,25 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- GSAP for animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <!-- Google Fonts: Montserrat for a modern, clean look -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <!-- Three.js for 3D effects -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <!-- Google Fonts: Orbitron for a futuristic look -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #1a3c34 0%, #0a2b3f 100%);
-      font-family: 'Montserrat', sans-serif;
+      background: #0a0a1f;
+      font-family: 'Orbitron', sans-serif;
       overflow-x: hidden;
       color: #e0f7fa;
+      margin: 0;
     }
-    .split-bg {
+    #holoCanvas {
       position: absolute;
       top: 0;
-      width: 50%;
-      height: 100vh;
-      transition: all 0.5s ease;
-      z-index: 1;
-    }
-    .utopia {
       left: 0;
-      background: url('https://i.pinimg.com/736x/17/f2/49/17f249b99582b9a8bc4b4e3512f5653e.jpg') no-repeat center/cover;
-      filter: brightness(1.1) saturate(1.2);
-    }
-    .dystopia {
-      right: 0;
-      background: url('https://markmanson.net/wp-content/uploads/2018/12/5-books-explaining-why-everything-is-fucked.jpg') no-repeat center/cover;
-      filter: grayscale(0.8) brightness(0.7) contrast(1.1);
+      width: 100%;
+      height: 100vh;
+      z-index: 1;
     }
     .overlay {
       position: absolute;
@@ -41,55 +34,66 @@
       left: 0;
       width: 100%;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.4);
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%);
       pointer-events: none;
       z-index: 2;
     }
     .clock {
-      font-size: 4.5rem;
+      font-size: 4rem;
       letter-spacing: 4px;
       text-shadow: 0 0 25px rgba(0, 255, 204, 0.7);
       color: #00e5ff;
+      animation: pulse 2s infinite;
     }
-    .btn-glow {
-      background: linear-gradient(90deg, #00e676, #00d4ff);
-      box-shadow: 0 0 15px rgba(0, 230, 118, 0.6), 0 0 30px rgba(0, 212, 255, 0.4);
-      transition: all 0.3s ease;
-      border: 2px solid #00e676;
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .holo-title {
+      font-size: 5rem;
+      color: #00e5ff;
+      text-shadow: 0 0 20px rgba(0, 225, 255, 0.8);
+      opacity: 0;
+    }
+    .holo-button {
+      position: relative;
+      z-index: 10;
+      background: none;
+      border: 3px solid #00e5ff;
       border-radius: 50px;
-      padding: 0.75rem 2.5rem;
+      padding: 1rem 3rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: #fff;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px rgba(0, 225, 255, 0.8);
+      box-shadow: 0 0 30px rgba(0, 225, 255, 0.5), inset 0 0 15px rgba(0, 225, 255, 0.3);
+      animation: glow 1.5s infinite alternate;
+      transition: transform 0.3s ease;
     }
-    .btn-glow:hover {
-      box-shadow: 0 0 25px rgba(0, 230, 118, 0.9), 0 0 40px rgba(0, 212, 255, 0.7);
-      transform: scale(1.05);
+    .holo-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 50px rgba(0, 225, 255, 0.8), inset 0 0 25px rgba(0, 225, 255, 0.5);
     }
-    .cloud {
-      position: absolute;
-      opacity: 0.3;
-      z-index: 3;
+    @keyframes glow {
+      0% { box-shadow: 0 0 30px rgba(0, 225, 255, 0.5), inset 0 0 15px rgba(0, 225, 255, 0.3); }
+      100% { box-shadow: 0 0 50px rgba(0, 225, 255, 0.8), inset 0 0 25px rgba(0, 225, 255, 0.5); }
     }
     .footer-links a {
       color: #80deea;
       transition: color 0.3s ease;
     }
     .footer-links a:hover {
-      color: #00e676;
+      color: #00e5ff;
     }
   </style>
 </head>
 <body>
-  <!-- Split Background -->
-  <div class="split-bg utopia"></div>
-  <div class="split-bg dystopia"></div>
+  <!-- Holographic Canvas -->
+  <canvas id="holoCanvas"></canvas>
   <div class="overlay"></div>
-
-  <!-- Animated Clouds -->
-  <div class="cloud" style="top: 10%; left: 5%;"><img src="https://cdn-icons-png.flaticon.com/512/414/414927.png" alt="cloud" width="100"></div>
-  <div class="cloud" style="top: 20%; right: 10%;"><img src="https://cdn-icons-png.flaticon.com/512/414/414927.png" alt="cloud" width="80"></div>
 
   <!-- Navbar -->
   <nav class="fixed top-0 w-full z-20 flex justify-between items-center px-8 py-4 bg-opacity-80 bg-gray-900">
@@ -105,13 +109,11 @@
   <!-- Hero Section -->
   <div class="relative z-10 flex flex-col items-center justify-center h-screen text-center px-4">
     <div id="clock" class="clock font-mono mb-10">10:00</div>
-    <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-shadow-lg">
-      Build a Greener Tomorrow
-    </h1>
+    <h1 id="holo-title" class="holo-title">Build a Greener Tomorrow</h1>
     <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-10 opacity-90">
-      Shape a sustainable future or face the consequences—your city’s fate hangs on every eco-choice.
+      Shape a sustainable future—your city’s fate hangs in the balance.
     </p>
-    <a href="game.html" class="btn-glow text-lg">Play Now</a>
+    <a href="game.html" class="holo-button">Play Now</a>
   </div>
 
   <!-- Game Info Section -->
@@ -169,8 +171,82 @@
     </div>
   </footer>
 
-  <!-- JavaScript for Countdown and Animations -->
+  <!-- JavaScript for Holographic Effects, Countdown, and Animations -->
   <script>
+    // Initialize Three.js Scene for Holographic Earth
+    let scene, camera, renderer, earth, rings, particles;
+    function initHolo() {
+      // Scene
+      scene = new THREE.Scene();
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 5;
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('holoCanvas'), alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+
+      // Earth
+      const geometry = new THREE.SphereGeometry(1.5, 64, 64);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x00e5ff,
+        emissive: 0x00e5ff,
+        emissiveIntensity: 0.3,
+        transparent: true,
+        opacity: 0.8,
+      });
+      earth = new THREE.Mesh(geometry, material);
+      scene.add(earth);
+
+      // Orbital Rings
+      const ringGeometry = new THREE.RingGeometry(2, 2.1, 64);
+      const ringMaterial = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+      rings = new THREE.Mesh(ringGeometry, ringMaterial);
+      rings.rotation.x = Math.PI / 2;
+      scene.add(rings);
+
+      // Particles (Stars)
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particlesCount = 5000;
+      const positions = new Float32Array(particlesCount * 3);
+      for (let i = 0; i < particlesCount * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 2000;
+      }
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const particlesMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2, transparent: true, opacity: 0.5 });
+      particles = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particles);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+      const pointLight = new THREE.PointLight(0x00e5ff, 2, 100);
+      pointLight.position.set(5, 5, 5);
+      scene.add(pointLight);
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    // Animate the Holographic Scene
+    function animateHolo() {
+      requestAnimationFrame(animateHolo);
+      earth.rotation.y += 0.005;
+      rings.rotation.z += 0.01;
+      particles.rotation.y += 0.001;
+      renderer.render(scene, camera);
+    }
+
+    // Initialize the holographic scene
+    initHolo();
+    animateHolo();
+
     // Countdown Timer
     let timeLeft = 600; // 10 minutes in seconds
     const clock = document.getElementById('clock');
@@ -190,40 +266,31 @@
     setInterval(updateClock, 1000);
 
     // GSAP Animations
+    // Typewriter effect for the title
+    const title = document.getElementById('holo-title');
+    const text = title.textContent;
+    title.textContent = '';
+    title.style.opacity = 1;
+    let i = 0;
+    function typeWriter() {
+      if (i < text.length) {
+        title.textContent += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, 100);
+      }
+    }
+    setTimeout(typeWriter, 1000);
+
+    // Animate other elements
     gsap.to('.clock', { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power2.out' });
-    gsap.to('h1', { opacity: 1, y: 0, duration: 1, delay: 1, ease: 'power2.out' });
-    gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 1.5, ease: 'power2.out' });
-    gsap.to('.btn-glow', { 
-      opacity: 1, 
-      scale: 1, 
-      duration: 1, 
-      delay: 2, 
-      ease: 'power2.out',
-      onComplete: () => console.log('Button animation completed')
-    });
-    gsap.to('.btn-glow', { 
-      boxShadow: '0 0 20px rgba(0, 230, 118, 0.8), 0 0 40px rgba(0, 212, 255, 0.6)', 
-      duration: 1.5, 
+    gsap.to('p', { opacity: 0.9, y: 0, duration: 1, delay: 2.5, ease: 'power2.out' });
+    gsap.to('.holo-button', { 
+      y: -20, 
+      duration: 2, 
       repeat: -1, 
       yoyo: true, 
-      ease: 'sine.inOut' 
-    });
-    gsap.to('.cloud', { x: 50, duration: 10, repeat: -1, yoyo: true, ease: 'linear' });
-
-    // Hover effects on split backgrounds
-    document.querySelector('.utopia').addEventListener('mouseenter', () => {
-      gsap.to('.utopia', { width: '60%', duration: 0.5 });
-      gsap.to('.dystopia', { width: '40%', duration: 0.5 });
-    });
-    document.querySelector('.dystopia').addEventListener('mouseenter', () => {
-      gsap.to('.utopia', { width: '40%', duration: 0.5 });
-      gsap.to('.dystopia', { width: '60%', duration: 0.5 });
-    });
-    document.body.addEventListener('mouseleave', (e) => {
-      if (!e.target.closest('.split-bg')) {
-        gsap.to('.utopia', { width: '50%', duration: 0.5 });
-        gsap.to('.dystopia', { width: '50%', duration: 0.5 });
-      }
+      ease: 'sine.inOut',
+      delay: 3
     });
   </script>
 </body>
