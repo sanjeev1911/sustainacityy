@@ -50,6 +50,7 @@ export class City extends THREE.Group {
         population += tile.building?.residents?.count || 0;
       }
     }
+    console.log('City.population:', population); // Debug population
     return population;
   }
 
@@ -80,9 +81,15 @@ export class City extends THREE.Group {
     if (tile && !tile.building) {
       const building = createBuilding(x, y, buildingType);
       if (building) {
-        console.log('Building created:', building.constructor.name);
+        console.log('Building created:', building.constructor.name, 'Type:', building.type);
         tile.setBuilding(building);
         tile.refreshView(this);
+
+        // Assign residents for residential buildings
+        if (building.type === BuildingType.residential) {
+          building.residents = { count: 100 }; // 100 residents per residential building
+          console.log('Assigned residents:', building.residents);
+        }
 
         // Refresh neighboring tiles
         this.getTile(x - 1, y)?.refreshView(this);
