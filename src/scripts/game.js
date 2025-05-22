@@ -1,41 +1,53 @@
 import * as THREE from 'three';
+import * as THREE from 'three';
 import { AssetManager } from './assets/assetManager.js';
 import { CameraManager } from './camera.js';
 import { InputManager } from './input.js';
 import { City } from './sim/city.js';
 import { SimObject } from './sim/simObject.js';
+import { CityManager } from './sim/cityManager.js';
+import { buildingConfigurations } from './assets/models.js';
 
+/**
+ * Represents the main game controller.
+ * Initializes and manages the game loop, scene, city, city manager, and UI interactions.
+ * Handles user input for tools, building placement, and simulation updates.
+ */
 export class Game {
+  /** @type {City} The current city instance being simulated. */
   city;
+  /** @type {CityManager} Manages the city's economy, stats, and save/load operations. */
+  cityManager;
   focusedObject = null;
   inputManager;
   selectedObject = null;
-  buildingCounts = { road: 0, residential: 0 };
-  buildings = [];
-  revenue = 1000000; // Inflated starting cash
-  maintenanceCost = 0;
-  pollution = 0;
-  happiness = 50;
-  lifespan = 100;
+  // buildingCounts is no longer the primary source for simulation stats like maintenance.
+  // It can be kept for UI display purposes or removed if UI directly uses this.buildings.
+  buildingCounts = { road: 0, residential: 0, commercial: 0, industrial: 0, 'power-plant': 0, 'power-line': 0 }; 
+  buildings = []; 
+  uiManager;
 
-  constructor(city) {
-    this.city = city;
+
+  constructor(uiManager) {
+    this.uiManager = uiManager;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.scene = new THREE.Scene();
-    this.inputManager = new InputManager(window.ui.gameWindow);
-    this.cameraManager = new CameraManager(window.ui.gameWindow);
+    this.inputManager = new InputManager(this.uiManager.gameWindow);
+    this.cameraManager = new CameraManager(this.uiManager.gameWindow);
 
-    this.renderer.setSize(window.ui.gameWindow.clientWidth, window.ui.gameWindow.clientHeight);
+    this.renderer.setSize(this.uiManager.gameWindow.clientWidth, this.uiManager.gameWindow.clientHeight);
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
-    window.ui.gameWindow.appendChild(this.renderer.domElement);
+    this.uiManager.gameWindow.appendChild(this.renderer.domElement);
 
     this.raycaster = new THREE.Raycaster();
 
+    // AssetManager should be initialized here or passed in, but for now, keep global for simplicity
     window.assetManager = new AssetManager(() => {
-      window.ui.hideLoadingText();
-      this.city = new City(16);
+      this.uiManager.hideLoadingText();
+      this.city = new City(16); // Initialize city
+      this.cityManager = new CityManager(this.city); // Initialize CityManager
       this.initialize(this.city);
       this.start();
       setInterval(this.simulate.bind(this), 1000); // Runs every second
@@ -96,31 +108,27 @@ export class Game {
   }
 
   simulate() {
-    if (window.ui.isPaused) return;
+    if (this.uiManager.isPaused) return; // Assuming uiManager will have an isPaused property
 
-    const taxRevenue = this.city.population * 10; // $10 per resident
-    this.maintenanceCost = (this.buildingCounts.road * 50) + (this.buildingCounts.residential * 100);
-    this.revenue += taxRevenue - this.maintenanceCost;
-    this.pollution = Math.min(1000, (this.buildingCounts.road * 10) + (this.buildingCounts.residential * 5));
-    this.happiness = Math.max(0, Math.min(100, 50 + (this.city.population / 50) - (this.pollution / 20)));
-    this.lifespan = Math.max(50, Math.min(100, 100 - (this.pollution / 10)));
+    // Pass the full buildings array to CityManager for it to calculate maintenance and pollution
+    const simStats = this.cityManager.simulateStats(this.buildings, this.city.population);
 
-    console.log('Simulate:', { 
-      revenue: this.revenue, 
-      population: this.city.population, 
-      pollution: this.pollution, 
-      happiness: this.happiness, 
-      lifespan: this.lifespan 
+    console.log('Simulate:', {
+      revenue: this.cityManager.currentRevenue, // Getter
+      population: this.city.population,
+      pollution: this.cityManager.currentPollution,
+      happiness: this.cityManager.currentHappiness,
+      lifespan: this.cityManager.currentLifespan
     });
 
-    if (this.revenue < 0) {
-      console.log('Game Over: Revenue dropped below 0');
-      window.showGameOver();
+    if (simStats.gameOver) {
+      console.log('Game Over: Revenue dropped below threshold');
+      this.uiManager.showGameOver('Revenue dropped below threshold'); // Pass reason
       this.stop();
       return;
     }
 
-    this.city.simulate(1); // Updates population dynamically via Residents class
+    this.city.simulate(1); // Updates population dynamically
   }
 
   draw() {
@@ -130,42 +138,66 @@ export class Game {
       this.useTool();
     }
     this.renderer.render(this.scene, this.cameraManager.camera);
-    if (window.updateMetrics) {
-      window.updateMetrics(); // Syncs UI with latest population
-    } else {
-      console.log('updateMetrics not found');
-    }
+    this.uiManager.updateMetrics(); // Direct call, GameUI checks for cityManager
   }
 
   useTool() {
-    switch (window.ui.activeToolId) {
+    const activeToolId = this.uiManager.activeToolId; // Get active tool from uiManager
+    switch (activeToolId) {
       case 'select':
         this.updateSelectedObject();
-        window.ui.updateInfoPanel(this.selectedObject);
+        this.uiManager.updateInfoPanel(this.selectedObject); // Use uiManager
         break;
       case 'bulldoze':
         if (this.focusedObject) {
           const { x, y } = this.focusedObject;
-          const building = this.city.bulldoze(x, y);
-          if (building) {
-            this.buildings = this.buildings.filter(b => b !== building);
-            if (building.type === 'road') this.buildingCounts.road--;
-            if (building.type === 'residential') this.buildingCounts.residential--;
+          const buildingToBulldoze = this.city.getTile(x,y)?.building;
+          if (buildingToBulldoze) {
+            const buildingType = buildingToBulldoze.type;
+            const building = this.city.bulldoze(x, y); // city.bulldoze returns the building object
+            if (building) {
+              this.buildings = this.buildings.filter(b => b !== building);
+              if (this.buildingCounts[buildingType] > 0) {
+                this.buildingCounts[buildingType]--;
+              }
+            }
           }
         }
         break;
-      default:
+      default: // Building placement
         if (this.focusedObject) {
           const { x, y } = this.focusedObject;
-          const type = window.ui.activeToolId;
-          const building = this.city.placeBuilding(x, y, type);
-          if (building) {
-            this.buildings.push(building);
-            building.type = type;
-            if (type === 'road') this.buildingCounts.road++;
-            if (type === 'residential') this.buildingCounts.residential++;
-            const costs = { road: 500, residential: 1500 }; // Inflated costs
-            this.revenue -= costs[type] || 0;
+          const type = activeToolId; // This is the building type string, e.g., 'residential'
+
+          const config = buildingConfigurations[type];
+          if (!config || config.cost === undefined) {
+            console.error('No cost configuration for building type:', type);
+            // Optionally, provide UI feedback here via uiManager
+            return; // Stop building process
+          }
+
+          if (this.cityManager.currentRevenue >= config.cost) { // Check if player can afford using getter
+            this.cityManager.deductRevenue(config.cost); // Use new method in CityManager
+            
+            const building = this.city.placeBuilding(x, y, type);
+            if (building) {
+              // building.type is already set within city.placeBuilding or by createBuilding
+              this.buildings.push(building); 
+              
+              // Update buildingCounts (can be used for UI or other non-simulation logic)
+              if (this.buildingCounts[type] !== undefined) {
+                this.buildingCounts[type]++;
+              } else {
+                this.buildingCounts[type] = 1;
+              }
+            } else {
+              // Refund if building placement failed for some reason after cost deduction
+              this.cityManager.revenue += config.cost; // Directly adjust or add a refund method
+              console.log('Building placement failed, refunding cost for:', type);
+            }
+          } else {
+            console.log('Not enough funds to build:', type);
+            // Optionally, provide UI feedback here via uiManager (e.g., this.uiManager.showNotification('Not enough funds!'))
           }
         }
         break;
@@ -198,15 +230,121 @@ export class Game {
   }
 
   onResize() {
-    this.cameraManager.resize(window.ui.gameWindow);
-    this.renderer.setSize(window.ui.gameWindow.clientWidth, window.ui.gameWindow.clientHeight);
+    this.cameraManager.resize(this.uiManager.gameWindow);
+    this.renderer.setSize(this.uiManager.gameWindow.clientWidth, this.uiManager.gameWindow.clientHeight);
   }
 
   setTool(toolId) {
-    window.ui.activeToolId = toolId;
+    this.uiManager.activeToolId = toolId; // Set active tool via uiManager
+  }
+
+  /**
+   * Loads and reconstructs the city state from a saved game object.
+   * This involves clearing the current city, re-initializing it with saved dimensions,
+   * and then re-placing all buildings and restoring their states (like resident counts).
+   * @param {object} savedState - The game state object loaded from storage, typically by `CityManager.loadGame()`.
+   * @param {number} savedState.citySize - The size (width/height) of the saved city.
+   * @param {Array<object>} savedState.tiles - An array of tile data objects, each describing a building and its location.
+   * @param {string} savedState.tiles[].buildingType - The type of building on the tile.
+   * @param {number} savedState.tiles[].x - The x-coordinate of the tile.
+   * @param {number} savedState.tiles[].y - The y-coordinate of the tile.
+   * @param {number} [savedState.tiles[].residents] - Optional. The number of residents for residential buildings.
+   */
+  loadCityState(savedState) {
+    console.log('Game: Loading city state...', savedState);
+
+    // Clear existing city visuals and data structures
+    if (this.city) {
+      this.scene.remove(this.city); // Remove old city from scene
+      this.city.disposeAllBuildingsAndTiles(); // Dispose THREE.js objects and clear tiles
+    }
+    this.buildings = [];
+    this.buildingCounts = { road: 0, residential: 0, commercial: 0, industrial: 0, 'power-plant': 0, 'power-line': 0 }; // Reset counts
+
+    // Re-initialize city with saved size
+    this.city = new City(savedState.citySize);
+    this.initialize(this.city); // Re-adds to scene, sets up grid/lights
+
+    // Re-place buildings
+    for (const tileData of savedState.tiles) {
+      const newBuilding = this.city.placeBuilding(tileData.x, tileData.y, tileData.buildingType);
+      if (newBuilding) {
+        this.buildings.push(newBuilding);
+        if (this.buildingCounts[tileData.buildingType] !== undefined) {
+          this.buildingCounts[tileData.buildingType]++;
+        } else {
+          this.buildingCounts[tileData.buildingType] = 1;
+        }
+
+        if (tileData.buildingType === 'residential' && tileData.residents !== undefined) {
+          if (!newBuilding.residents) { // Should be created by placeBuilding if it's residential
+            console.warn('Residential building loaded without residents module instance:', newBuilding);
+          } else {
+            newBuilding.residents.count = tileData.residents;
+          }
+        }
+        // Capacity is set during placeBuilding using buildingConfigurations,
+        // but ensure it matches saved data if needed, or that save format is consistent with config.
+        // For now, we rely on placeBuilding to set capacity from config.
+        // If tileData.buildingCapacity was saved, we could double check:
+        // if (newBuilding.capacity !== tileData.buildingCapacity) { console.warn(...); }
+      } else {
+        console.error(`Failed to re-place building of type ${tileData.buildingType} at ${tileData.x},${tileData.y}`);
+      }
+    }
+    
+    // CityManager stats (like revenue, happiness etc.) are already restored by cityManager.loadGame() itself.
+    // No need to set this.cityManager.currentRevenue = savedState.revenue; here.
+
+    this.uiManager.updateMetrics(); // Refresh UI with new data
+    console.log('Game: City state loaded successfully.');
+  }
+
+  /**
+   * Initiates the game loading sequence.
+   * It calls the CityManager to load data from storage and then, if successful,
+   * triggers the reconstruction of the city state via `loadCityState`.
+   */
+  triggerLoadGame() {
+    console.log('Game: Triggering load game...');
+    const savedState = this.cityManager.loadGame(); // CityManager.loadGame() already restores its own simple stats
+    if (savedState && savedState.tiles && savedState.citySize !== undefined) {
+      this.loadCityState(savedState);
+    } else {
+      console.log("Failed to load game data or data is incomplete.");
+      // Optionally, provide UI feedback: this.uiManager.showNotification("Failed to load game data.");
+    }
   }
 }
 
 window.onload = () => {
-  window.game = new Game();
+  // window.ui is already initialized in ui.js as: window.ui = new GameUI();
+  // The Game constructor expects the GameUI instance.
+
+  // Ensure the render target element exists, as GameUI constructor uses it.
+  // GameUI uses 'render-target', the old conceptual uiManager used 'game-window'.
+  // Let's assume 'render-target' is the correct one from ui.js.
+  const renderTarget = document.getElementById('render-target'); 
+  if (!renderTarget) {
+    console.error('Error: Element with ID "render-target" not found. Please ensure it exists in your HTML.');
+    // Display error prominently if core UI element is missing
+    document.body.innerHTML = '<div style="color:red; font-size: 20px; padding: 20px;">Error: #render-target not found. Cannot initialize game UI.</div>';
+    return;
+  }
+  
+  // Ensure loading text element exists if hideLoadingText is used by GameUI (which it is)
+  // ui.js GameUI constructor does not call hideLoadingText, Game.js constructor does.
+  // Game.js calls this.uiManager.hideLoadingText() via window.assetManager callback.
+  // So, window.ui (the GameUI instance) must be ready.
+  if (!document.getElementById('loading')) { // ui.js uses 'loading'
+      const loadingTextElement = document.createElement('div');
+      loadingTextElement.id = 'loading';
+      loadingTextElement.innerText = 'Loading...';
+      // Prepend to body so it's likely visible
+      document.body.prepend(loadingTextElement); 
+      console.warn('Element with ID "loading" was not found. A dummy one was created.');
+  }
+
+  window.game = new Game(window.ui); // Pass the global GameUI instance
+  window.ui.setCityManager(window.game.cityManager); // Set the cityManager reference in GameUI
 };

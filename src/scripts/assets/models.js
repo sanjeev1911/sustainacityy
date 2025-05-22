@@ -1,4 +1,62 @@
-export default {
+/**
+ * Configuration object for all placeable building types.
+ * Defines cost, capacity (for residential), maintenance, pollution output,
+ * descriptive text, and potentially other type-specific properties for each building.
+ *
+ * @type {Object.<string, {
+ *   cost: number,
+ *   maintenance: number,
+ *   pollution: number,
+ *   description: string,
+ *   capacity?: number, // Optional: For residential buildings
+ *   powerOutput?: number // Optional: For power plants
+ *   // Add other type-specific properties as needed
+ * }>}
+ */
+export const buildingConfigurations = {
+  road: {
+    cost: 100,
+    maintenance: 10,
+    pollution: 1,
+    description: 'Connects your city and allows for transport.'
+  },
+  residential: {
+    cost: 750,
+    capacity: 50,
+    maintenance: 20,
+    pollution: 2,
+    description: 'Provides housing for your citizens.'
+  },
+  commercial: { // Added as a common type
+    cost: 1000,
+    maintenance: 50,
+    pollution: 5,
+    description: 'Provides jobs and services.'
+  },
+  industrial: { // Added as a common type
+    cost: 1200,
+    maintenance: 70,
+    pollution: 20,
+    description: 'Provides jobs and manufactures goods.'
+  },
+  'power-plant': { // From BuildingType.js
+    cost: 5000,
+    maintenance: 250,
+    pollution: 30,
+    powerOutput: 1000, // Example custom property
+    description: 'Generates power for your city.'
+  },
+  'power-line': { // From BuildingType.js
+    cost: 50,
+    maintenance: 5,
+    pollution: 0,
+    description: 'Transmits power across your city.'
+  }
+  // Add other building types like 'firestation', 'police', 'park' as needed
+  // based on activeToolId values used in ui.js and Game.js.
+};
+
+export default { // Keep existing models export for 3D model data
   "under-construction": {
     "type": "zone",
     "filename": "construction-small.glb",
